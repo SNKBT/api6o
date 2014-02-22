@@ -167,7 +167,7 @@ $app->get ( '/db-test', function () use($app) {
 
 $app->get ( '/db', function () {
 	$template = <<<EOT
-<!DOCTYPE html>
+<!DOCTYPE 
     <html>
         <head>
             <meta charset="utf-8"/>
@@ -177,7 +177,7 @@ $app->get ( '/db', function () {
                 h1,h2,h3,h4,h5,h6,p,blockquote,pre,
                 abbr,address,cite,code,
                 del,dfn,em,img,ins,kbd,q,samp,
-                small,strong,sub,sup,var,
+                small,strong,html>sub,sup,var,
                 b,i,
                 dl,dt,dd,ol,ul,li,
                 fieldset,form,label,legend,
@@ -241,9 +241,9 @@ $app->get ( '/db', function () {
 			<td align="center" class="yfnc_formbody1" id="daterange">
 			<table border="0" cellpadding="2" cellspacing="0">
 			<tr>
-			<td align="right" nowrap><label for="startmonth"><small><strong>Start Date:</strong></small></label></td>
+			<td align="right" nowrap><label for="a"><small><strong>Start Date:</strong></small></label></td>
 			<td align="center">
-				<select name="a" id="startmonth">
+				<select name="startmonth" id="a">
 					<option value="00">Jan</option>
 					<option selected value="01">Feb</option>
 					<option value="02">Mar</option>
@@ -258,17 +258,17 @@ $app->get ( '/db', function () {
 					<option value="11">Dec</option>
 				</select>
 			</td>
-			<td align="center"><label for="startday" class="srinfo">day</label>
-				<input type="text" name="b" id="startday" size="2" maxlength="2" value="5">
+			<td align="center"><label for="b" class="srinfo">day</label>
+				<input type="text" name="startday" id="b" size="2" maxlength="2" value="5">
 			</td>
-			<td align="center"><label for="startyear" class="srinfo">Year</label>
-				<input type="text" name="c" id="startyear" size="4" maxlength="4" value="1971">
+			<td align="center"><label for="c" class="srinfo">Year</label>
+				<input type="text" name="startyear" id="c" size="4" maxlength="4" value="1971">
 			</td>
 			<td><nobr style="font-size:90%;">Eg. Jan 1, 2010</nobr></td>
 			</tr>
 			<tr>
-				<td align="right" nowrap><label for="endmonth"><small><strong>End Date:</strong></small></label></td>
-				<td align="center"><select name="d" id="endmonth"><option value="00">Jan</option><option selected value="01">Feb</option><option value="02">Mar</option><option value="03">Apr</option><option value="04">May</option><option value="05">Jun</option><option value="06">Jul</option><option value="07">Aug</option><option value="08">Sep</option><option value="09">Oct</option><option value="10">Nov</option><option value="11">Dec</option></select></td><td align="center"><label for="endday" class="srinfo">day</label><input type="text" id="endday" name="e" size="2" maxlength="2" value="19"></td><td align="center"><label for="endyear" class="srinfo">Year</label><input type="text" id="endyear" name="f" size="4" maxlength="4" value="2014"></td></tr></table></td><td class="yfnc_formbody1" id="rangetype"><table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td width="1%"><input type="radio" name="g" value="d" id="daily" checked></td><td><label for="daily">Daily</label></td></tr><tr><td width="1%"><input type="radio" name="g" value="w" id="weekly"></td><td><label for="weekly">Weekly</label></td></tr><tr><td width="1%"><input type="radio" name="g" value="m" id="monthly"></td><td><label for="monthly">Monthly</label></td></tr><tr><td width="1%"><input type="radio" name="g" value="v" id="divonly"></td><td nowrap><label for="divonly">Dividends Only</label></td></tr></table></td></tr><tr><td colspan="2" align="center" class="yfnc_formbody1"><input type="submit" value="Get Prices" class="rapid-nf"></td></tr></table></td></tr></table></form>
+				<td align="right" nowrap><label for="d"><small><strong>End Date:</strong></small></label></td>
+				<td align="center"><select name="endmonth" id="d"><option value="00">Jan</option><option selected value="01">Feb</option><option value="02">Mar</option><option value="03">Apr</option><option value="04">May</option><option value="05">Jun</option><option value="06">Jul</option><option value="07">Aug</option><option value="08">Sep</option><option value="09">Oct</option><option value="10">Nov</option><option value="11">Dec</option></select></td><td align="center"><label for="endday" class="srinfo">day</label><input type="text" id="endday" name="e" size="2" maxlength="2" value="19"></td><td align="center"><label for="endyear" class="srinfo">Year</label><input type="text" id="endyear" name="f" size="4" maxlength="4" value="2014"></td></tr></table></td><td class="yfnc_formbody1" id="rangetype"><table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td width="1%"><input type="radio" name="g" value="d" id="daily" checked></td><td><label for="daily">Daily</label></td></tr><tr><td width="1%"><input type="radio" name="g" value="w" id="weekly"></td><td><label for="weekly">Weekly</label></td></tr><tr><td width="1%"><input type="radio" name="g" value="m" id="monthly"></td><td><label for="monthly">Monthly</label></td></tr><tr><td width="1%"><input type="radio" name="g" value="v" id="divonly"></td><td nowrap><label for="divonly">Dividends Only</label></td></tr></table></td></tr><tr><td colspan="2" align="center" class="yfnc_formbody1"><input type="submit" value="Get Prices" class="rapid-nf"></td></tr></table></td></tr></table></form>
 			
           
             </section>
@@ -278,35 +278,55 @@ EOT;
 	echo $template;
 } );
 function addHistoricalPrices() {
-	$request = \Slim\Slim::getInstance ()->request ();
-	$hisPri = $request->getBody ();
 	
-	$code = $hisPri->code;
-	$fromYear = $hisPri->startyear;
-	$fromMonth = $hisPri->startmonth;
-	$fromDay = $hisPri->startday;
-	$toYear = $hisPri->endyear;
-	$toMonth = $hisPri->endmonth;
-	$toDay = $hisPri->endday;
+	/**
+	 * $request = \Slim\Slim::getInstance ()->request ();
+	 * $hisPri = $request->getBody ();
+	 *
+	 * echo $hisPri->code;
+	 * echo $hisPri->startyear;
+	 * echo $hisPri->startmonth;
+	 * echo $hisPri->startday;
+	 *
+	 * $code = $hisPri->code;
+	 * $fromYear = $hisPri->startyear;
+	 * $fromMonth = $hisPri->startmonth;
+	 * $fromDay = $hisPri->startday;
+	 * $toYear = $hisPri->endyear;
+	 * $toMonth = $hisPri->endmonth;
+	 * $toDay = $hisPri->endday;
+	 *
+	 * echo "url=http://ichart.finance.yahoo.com/table.csv?s=" . $code . "&d=" . $toMonth . "&e=" . $toDay . "&f=" . $toYear . "&g=d&a=" . $fromMonth . "&b=" . $fromDay . "&c=" . $fromYear . "&ignore=.csv";
+	 */
+	$data_array = array ();
 	
-	echo "\$url=\"http://ichart.finance.yahoo.com/table.csv?s=" . $code . "&d=" . $toMonth . "&e=" . $toDay . "&f=" . $toYear . "&g=d&a=" . $fromMonth . "&b=" . $fromDay . "&c=" . $fromYear . "&ignore=.csv\"";
-
-/**
- * $url = ""; // http://ichart.finance.yahoo.com/table.csv?s=%5EIXIC&d=1&e=19&f=2014&g=d&a=1&b=5&c=1971&ignore=.csv";
- *
- * $row = 1;
- * if (($handle = fopen ( $url, "r" )) !== FALSE) {
- * while ( ($data = fgetcsv ( $handle, 1000, "," )) !== FALSE ) {
- * $num = count ( $data );
- * echo "<p> $num fields in line $row: <br /></p>\n";
- * $row ++;
- * for($c = 0; $c < $num; $c ++) {
- * echo $data [$c] . "<br />\n";
- * }
- * }
- * fclose ( $handle );
- * }
- */
+	$url = "http://ichart.finance.yahoo.com/table.csv?s=%5EIXIC&d=1&e=19&f=2014&g=d&a=1&b=5&c=1971&ignore=.csv";
+	
+	$row = 1;
+	
+	if (($handle = fopen ( $url, "r" )) !== FALSE) {
+		while ( ($data = fgetcsv ( $handle, 1000, "," )) !== FALSE ) {
+			$num = count ( $data );
+			// echo "<p> $num Felder in Zeile $row: <br /></p>\n";
+			
+			for($c = 0; $c < $num; $c ++) {
+				// echo $data [$c] . "<br />\n";
+				$data_array [$row] ['SMI_TradeDate'] = $data [0];
+				$data_array [$row] ['SMI_Open'] = $data [1];
+				$data_array [$row] ['SMI_High'] = $data [2];
+			}
+			$row ++;
+		}
+		fclose ( $handle );
+	}
+	array_shift ( $data_array );
+	echo "<pre>";
+	print_r ( $data_array );
+	echo "</pre>";
+	
+	/*
+	 * SMI_TradeDate				Date NOT NULL, SMI_Open				Double NOT NULL, SMI_High				Double NOT NULL, SMI_Low				Double NOT NULL, SMI_Close				Double NOT NULL, SMI_Volume				Double NOT NULL, SMI_AdjClose				Double NOT NULL,
+	 */
 }
 
 /**
