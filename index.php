@@ -324,7 +324,7 @@ function addHistoricalPrices() {
 	print_r ( $data_array );
 	echo "</pre>";
 	
-	echo "dummi hurre ruederer";
+	echo "säschu";
 	
 	
 	
