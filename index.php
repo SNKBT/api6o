@@ -129,7 +129,7 @@ EOT;
 } );
 
 $app->get ( '/api/:name', function ($name) {
-	echo "Hello, $name";
+	echo "Hello JSON, $name";
 } );
 // $app->get ( '/wines', 'getWines' );
 // $app->get ( '/wines/:id', 'getWine' );
@@ -323,6 +323,10 @@ function addHistoricalPrices() {
 	echo "<pre>";
 	print_r ( $data_array );
 	echo "</pre>";
+	
+	echo "seeeeeeeeelleri";
+	
+	
 	
 	/*
 	 * SMI_TradeDate				Date NOT NULL, SMI_Open				Double NOT NULL, SMI_High				Double NOT NULL, SMI_Low				Double NOT NULL, SMI_Close				Double NOT NULL, SMI_Volume				Double NOT NULL, SMI_AdjClose				Double NOT NULL,
