@@ -1,0 +1,43 @@
+ {
+    "basePath": "http://localhost/api6o",
+    "resourcePath": "/api2",
+    "description": "Operations about blabla222",
+    "swaggerVersion": "1.2",
+    "apiVersion": "0.1",
+    "apis": [
+        {
+            "path": "/api-docs/test.json",
+            "format": "json",
+            "description": "TEST Download a json file",
+            "operations": [
+                {
+                    "httpMethod": "GET",
+                    "summary": "Downloads a json file",
+                    "responseClass": "String",
+                    "nickname": "jsonTest",
+                    "produces": [
+                       "application/json",
+                       "text/html"
+                    ]
+                }
+            ]
+        },
+        {
+            "path": "/json",
+            "format": "json",
+            "description": "TEST Download a json file",
+            "operations": [
+                {
+                    "httpMethod": "GET",
+                    "summary": "Downloads a json file",
+                    "responseClass": "String",
+                    "nickname": "jsonTest",
+                    "produces": [
+                       "application/json",
+                       "text/html"
+                    ]
+                }
+            ]
+        }
+    ]
+}

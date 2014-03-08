@@ -1,0 +1,19 @@
+{
+    "basePath": "http://example.com/api",
+    "swaggerVersion": "1.2",
+    "apiVersion": "0.2",
+    "resourcePath": "/test",
+    "apis": [
+        {
+            "path": "/hello/:name",
+            "operations": [
+                {
+                    "method": "GET",
+                    "summary": "Return the given name",
+                    "nickname": "helloName",
+                    "type": "hello[name]"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,14 @@
+{
+    "apiVersion": "0.2",
+    "swaggerVersion": "1.2",
+    "apis": [
+        {
+            "path": "/trade.json",
+            "description": "An example resource"
+        },
+        {
+            "path": "/api2.json",
+            "description": "An example resource"
+        }
+    ]
+}
