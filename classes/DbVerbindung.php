@@ -4,7 +4,7 @@ class DbVerbindung {
 	function __construct() {
 	}
 	function connect() {
-		include_once '/includes/config.php';
+		include_once 'includes/config.php';
 		
 		try {
 			$this->conn = new PDO ( "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USERNAME, DB_PASSWORD );
@@ -15,6 +15,10 @@ class DbVerbindung {
 		}
 		
 		return $this->conn;
+	}
+	
+	function error($e) {
+		echo '{""error":false,"status":200,"message":"' . $e . '"}';
 	}
 }
 

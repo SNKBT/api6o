@@ -12,23 +12,31 @@
  * 
  */
 class Test {
-    /**
-     * @SWG\Api(
-     *   path="/hello/:name",
-     *   @SWG\Operation(
-     *     summary="Return the given name",
-     *     method="GET",
-     *     type="hello[name]"
-     *   )
-     * )
-     *
-     * Auto-generated:
-     * nickname resolves to the method name "get_dogs"
-     */
+	/**
+	 * @SWG\Api(
+	 * path="/hello/:name",
+	 * @SWG\Operation(
+	 * summary="Return the given name",
+	 * method="GET",
+	 * type="hello[name]"
+	 * )
+	 * )
+	 *
+	 * Auto-generated:
+	 * nickname resolves to the method name "get_dogs"
+	 */
 	function helloName($name) {
 		$data_array = array ();
-		$data_array["Name"] = $name;
+		$data_array ["Name"] = $name;
 		return $data_array;
+	}
+	function testPost() {
+		if (isset ( $_POST )) {
+			echo "Deine mitgegebenen Attribute sind ... <br />";
+			echo "<pre>";
+			print_r ( $_POST );
+			echo "</pre>";
+		}
 	}
 }
 
