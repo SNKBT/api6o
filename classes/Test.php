@@ -2,8 +2,8 @@
 /**
  * An example resource
  * @SWG\Resource(
- *  apiVersion="0.2",
- *  basePath="http://example.com/api"
+ *  apiVersion="0.1",
+ *  basePath="http://api.bfh6o.square7.ch"
  * )
  *
  * Auto-generated:
@@ -14,11 +14,18 @@
 class Test {
 	/**
 	 * @SWG\Api(
-	 * path="/hello/:name",
+	 * path="/hello/{name}",
 	 * @SWG\Operation(
 	 * summary="Return the given name",
 	 * method="GET",
-	 * type="hello[name]"
+	 * type="Name",
+	 * @SWG\Parameter(
+	 * name="name",
+	 * description="Name of e.g. a person that needs to be returned",
+	 * paramType="path",
+	 * required=true,
+	 * type="string"
+	 * )
 	 * )
 	 * )
 	 *

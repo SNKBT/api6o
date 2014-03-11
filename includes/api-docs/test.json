@@ -1,17 +1,26 @@
 {
-    "basePath": "http://example.com/api",
+    "basePath": "http://api.bfh6o.square7.ch",
     "swaggerVersion": "1.2",
-    "apiVersion": "0.2",
+    "apiVersion": "0.1",
     "resourcePath": "/test",
     "apis": [
         {
-            "path": "/hello/:name",
+            "path": "/hello/{name}",
             "operations": [
                 {
                     "method": "GET",
                     "summary": "Return the given name",
                     "nickname": "helloName",
-                    "type": "hello[name]"
+                    "type": "Name",
+                    "parameters": [
+                        {
+                            "paramType": "path",
+                            "name": "name",
+                            "type": "string",
+                            "required": true,
+                            "description": "Name of e.g. a person that needs to be returned"
+                        }
+                    ]
                 }
             ]
         }
