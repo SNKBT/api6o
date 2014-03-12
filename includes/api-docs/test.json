@@ -1,5 +1,5 @@
 {
-    "basePath": "http://api.bfh6o.square7.ch",
+    "basePath": "http://localhost/api6o",
     "swaggerVersion": "1.2",
     "apiVersion": "0.1",
     "resourcePath": "/test",

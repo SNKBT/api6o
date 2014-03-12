@@ -99,10 +99,13 @@ class DbHandler {
 			echo '{"error":{"text":' . $e->getMessage () . '}}';
 		}
 		
-		echo $letztesDatum;
+		echo $letztesDatum." und heute ist d=".date("d")." und e=".date("m")." und f=".date("Y");
 		exit ();
 		
 		$data_array = array ();
+		
+		// ACHTUNG MONTH -1 rechnen
+		
 		$url = "http://ichart.finance.yahoo.com/table.csv?s=%5EIXIC&d=1&e=19&f=2014&g=d&a=1&b=5&c=1971&ignore=.csv";
 		
 		$row = 1;
