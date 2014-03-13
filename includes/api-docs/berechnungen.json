@@ -1,0 +1,42 @@
+{
+    "basePath": "http://api.localhost",
+    "swaggerVersion": "1.2",
+    "apiVersion": "0.1",
+    "resourcePath": "/berechnungen",
+    "apis": [
+        {
+            "path": "/leseIndexe",
+            "operations": [
+                {
+                    "method": "GET",
+                    "summary": "Gibt die in der DB vorhandenen Indexe zur&uml;ck.",
+                    "nickname": "leseIndexe",
+                    "type": "Index",
+                    "responseMessages": [
+                        {
+                            "code": 404,
+                            "message": "Keine Indexe gefunden"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "models": {
+        "Index": {
+            "id": "Index",
+            "properties": {
+                "ID": {
+                    "type": "integer"
+                },
+                "Name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "ID",
+                "Name"
+            ]
+        }
+    }
+}
