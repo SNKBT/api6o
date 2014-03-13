@@ -3,6 +3,10 @@
     "swaggerVersion": "1.2",
     "apis": [
         {
+            "path": "/berechnungen.json",
+            "description": "API Berechnungen"
+        },
+        {
             "path": "/test.json",
             "description": "An example resource"
         }

@@ -13,12 +13,12 @@ $app = new \Slim\Slim ();
 $app->view ( new \JsonAPI () );
 
 $test = new Test ();
-$berechnungen = new Berechnungen ();
-$dbh = new DbHandler ();
+$dbh = new DbHandler ( $app );
+$berechnungen = new Berechnungen ( $dbh, $app );
 
 // ------------- GET route -------------
 $app->get ( '/', function () use($app) {
-	$app->redirect ( SERVER_ROOT.'libs/swagger' );
+	$app->redirect ( SERVER_ROOT . 'libs/swagger' );
 } );
 $app->get ( '/hello/:name', function ($name) use($app, $test) {
 	$app->render ( 200, $test->helloName ( $name ) );
@@ -26,13 +26,13 @@ $app->get ( '/hello/:name', function ($name) use($app, $test) {
 $app->get ( '/dbTest', function () use($app, $dbh) {
 	$app->render ( 200, $dbh->dbTest () );
 } );
-$app->get ( '/leseIndexe', function () use($app, $dbh) {
-	$app->render ( 200, $dbh->leseIndexe () );
+$app->get ( '/leseIndexe', function () use($berechnungen) {
+	$berechnungen->leseIndexe ();
 } );
 
 // ------------- POST route -------------
-$app->post ( '/berechneRendite', function () use($app, $berechnungen) {
-	$app->render ( 200, $berechnungen->berechneRendite () );
+$app->post ( '/berechneRendite', function () use($berechnungen) {
+	$berechnungen->berechneRendite ();
 } );
 $app->post ( '/db/add', function () use($app, $dbh) {
 	$dbh->aktualisiereAlleIndexe ();

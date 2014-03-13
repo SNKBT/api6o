@@ -3,7 +3,7 @@
  * An example resource
  * @SWG\Resource(
  *  apiVersion="0.1",
- *  basePath="http://localhost/api6o"
+ *  basePath="http://api.localhost"
  * )
  *
  * Auto-generated:

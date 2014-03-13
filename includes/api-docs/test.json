@@ -1,5 +1,5 @@
 {
-    "basePath": "http://localhost/api6o",
+    "basePath": "http://api.localhost",
     "swaggerVersion": "1.2",
     "apiVersion": "0.1",
     "resourcePath": "/test",
