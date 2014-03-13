@@ -5,6 +5,8 @@ require 'classes/Test.php';
 require 'classes/Berechnungen.php';
 require 'classes/DbHandler.php';
 
+require_once 'includes/config.php';
+
 \Slim\Slim::registerAutoloader ();
 
 $app = new \Slim\Slim ();
@@ -16,7 +18,7 @@ $dbh = new DbHandler ();
 
 // ------------- GET route -------------
 $app->get ( '/', function () use($app) {
-	$app->redirect ( '/api6o/libs/swagger' );
+	$app->redirect ( SERVER_ROOT.'libs/swagger' );
 } );
 $app->get ( '/hello/:name', function ($name) use($app, $test) {
 	$app->render ( 200, $test->helloName ( $name ) );
