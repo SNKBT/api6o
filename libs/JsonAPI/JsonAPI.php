@@ -51,16 +51,8 @@ class JsonAPI extends \Slim\View {
 		
         $app->response()->status($status);
         $app->response()->header('Content-Type', 'application/json');
-        $app->response()->body(json_encode($response));
+        $app->response()->body(json_encode($response, JSON_NUMERIC_CHECK));
 
         $app->stop();
     }
-    /**
-    function getConnection() {
-    	require_once '/includes/config.php';
-    	$dbh = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME, DB_USERNAME, DB_PASSWORD);
-    	$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    	return $dbh;
-    }*/
-
 }
