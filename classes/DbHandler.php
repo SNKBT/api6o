@@ -20,18 +20,57 @@ class DbHandler {
 	}
 	public function leseIndexe() {
 		try {
-			$query = $this->conn->prepare ( "SELECT * FROM indexe ORDER BY Name ASC" );
-			if ($query->execute () && $query->rowCount() > 0) {
+			$query = $this->conn->prepare ( "SELECT * FROM indexe ORDER BY ID ASC" );
+			if ($query->execute () && $query->rowCount () > 0) {
 				$result = array ();
-				$result = $query->fetchAll(PDO::FETCH_OBJ);
+				$result = $query->fetchAll ( PDO::FETCH_OBJ );
 				$this->app->render ( 200, $result );
 			} else {
-				throw new PDOException('NO DATA FOUND');
+				throw new PDOException ( 'NO DATA FOUND' );
 			}
 		} catch ( PDOException $e ) {
 			$message = (DEBUG == true) ? $e->getMessage () : "Keine Indexe gefunden";
-			$this->app->render ( 404, array("message" => $message, "error" => true));
-			$this->app->stop();
+			$this->app->render ( 404, array (
+					"message" => $message,
+					"error" => true 
+			) );
+			$this->app->stop ();
+		}
+	}
+	public function pruefeIndex($indexID = NULL) {
+		try {
+			$query = $this->conn->prepare ( "SELECT ID FROM indexe WHERE ID=" . $indexID );
+			if ($query->execute () && $query->rowCount () > 0) {
+				return intval ( $query->fetchColumn () );
+			} else {
+				throw new PDOException ( 'NO DATA FOUND' );
+			}
+		} catch ( PDOException $e ) {
+			$message = (DEBUG == true) ? $e->getMessage () : "Keine Indexe gefunden";
+			$this->app->render ( 404, array (
+					"message" => $message,
+					"error" => true 
+			) );
+			$this->app->stop ();
+		}
+	}
+	public function leseIndexWerte($indexID, $startDatum, $endDatum) {
+		try {
+			$query = $this->conn->prepare ( "SELECT tradeDate, adjClose FROM indexe_values WHERE FK_indexe_ID=" . $indexID . " AND tradeDate >='" . $startDatum . "' AND tradeDate<='" . $endDatum . "'" );
+			if ($query->execute () && $query->rowCount () > 0) {
+				$result = array ();
+				$result = $query->fetchAll ( PDO::FETCH_OBJ );
+				return $result;
+			} else {
+				throw new PDOException ( 'NO DATA FOUND' );
+			}
+		} catch ( PDOException $e ) {
+			$message = (DEBUG == true) ? $e->getMessage () : "Keine Indexe gefunden";
+			$this->app->render ( 404, array (
+					"message" => $message,
+					"error" => true 
+			) );
+			$this->app->stop ();
 		}
 	}
 	public function aktualisiereAlleIndexe($data_array) {
@@ -61,11 +100,8 @@ class DbHandler {
 		
 		if (($handle = fopen ( $url, "r" )) !== FALSE) {
 			while ( ($data = fgetcsv ( $handle, 1000, "," )) !== FALSE ) {
-				$num = count ( $data );
-				// echo "<p> $num Felder in Zeile $row: <br /></p>\n";
-				
+				$num = count ( $data );	
 				for($c = 0; $c < $num; $c ++) {
-					// echo $data [$c] . "<br />\n";
 					$data_array [$row] ['tradedate'] = $data [0];
 					$data_array [$row] ['open'] = $data [1];
 					$data_array [$row] ['high'] = $data [2];
@@ -79,47 +115,17 @@ class DbHandler {
 			fclose ( $handle );
 		}
 		array_shift ( $data_array );
-		// echo "<pre>";
-		// print_r ( $data_array );
-		// echo "</pre>";
-		// $app->render ( 200, $data_array );
-		// $data_array = "";
-		
 		$this->schreibeIndexe ( $data_array );
-		/*
-		 * SMI_TradeDate				Date NOT NULL, SMI_Open				Double NOT NULL, SMI_High				Double NOT NULL, SMI_Low				Double NOT NULL, SMI_Close				Double NOT NULL, SMI_Volume				Double NOT NULL, SMI_AdjClose				Double NOT NULL,
-		 */
 	}
 	private function schreibeIndexe($data_array) {
-		/**
-		 * $data_array = array ();
-		 * $data_array [0] = array (
-		 * 'tradedate' => '2014-01-08',
-		 * 'adjclose' => 199
-		 * );
-		 * $data_array [1] = array (
-		 * 'tradedate' => '2014-02-03',
-		 * 'adjclose' => 163
-		 * );
-		 * $data_array [2] = array (
-		 * 'tradedate' => '2014-02-04',
-		 * 'adjclose' => 143
-		 * );
-		 * $data_array [3] = array (
-		 * 'tradedate' => '2014-02-08',
-		 * 'adjclose' => 183
-		 * );
-		 */
 		if (empty ( $data_array )) {
 			echo '{"error":{"text":"Array ist leer!"}}';
 			exit ();
 		}
-		
 		$this->loescheIndexe ();
-		
 		try {
 			$this->conn->beginTransaction ();
-			$query = $this->conn->prepare ( "INSERT INTO smi (smi_TradeDate, smi_AdjClose) VALUES (?, ?)" );
+			$query = $this->conn->prepare ( "INSERT INTO indexe_values (tradeDate, adjClose, FK_indexe_ID) VALUES (?, ?, 2)" );
 			foreach ( $data_array as $key ) {
 				// $query->bindParam ( "tradedate", $key ['tradedate'] );
 				// $query->bindParam ( "adjclose", $key ['adjclose'] );

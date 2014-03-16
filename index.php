@@ -3,6 +3,7 @@ require 'libs/Slim/Slim.php';
 require 'libs/JsonAPI/JsonAPI.php';
 require 'classes/Test.php';
 require 'classes/Berechnungen.php';
+require 'classes/YahooDaten.php';
 require 'classes/DbHandler.php';
 
 require_once 'includes/config.php';
@@ -14,6 +15,7 @@ $app->view ( new \JsonAPI () );
 
 $test = new Test ();
 $dbh = new DbHandler ( $app );
+$yahooDaten = new YahooDaten ( $dbh );
 $berechnungen = new Berechnungen ( $dbh, $app );
 
 // ------------- GET route -------------
@@ -34,8 +36,8 @@ $app->get ( '/leseIndexe', function () use($berechnungen) {
 $app->post ( '/berechneRendite', function () use($berechnungen) {
 	$berechnungen->berechneRendite ();
 } );
-$app->post ( '/db/add', function () use($app, $dbh) {
-	$dbh->aktualisiereAlleIndexe ();
+$app->post ( '/db/add', function () use($app, $yahooDaten) {
+	$yahooDaten->aktualisiereAlleIndexe ();
 } );
 $app->post ( '/db/update', function () use($app, $dbh) {
 	$dbh->aktualisiereDeltaIndexe ();

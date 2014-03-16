@@ -26,7 +26,9 @@ class YahooDaten {
 		 */
 		$data_array = array ();
 		
-		$url = "http://ichart.finance.yahoo.com/table.csv?s=%5EIXIC&d=1&e=19&f=2014&g=d&a=1&b=5&c=1971&ignore=.csv";
+		//$url = "http://ichart.finance.yahoo.com/table.csv?s=%5ENDX&d=2&e=16&f=2014&g=d&a=9&b=1&c=1985&ignore=.csv"; //NASDAQ-100
+		// $url = "http://ichart.finance.yahoo.com/table.csv?s=%5ESSMI&d=2&e=16&f=2014&g=d&a=10&b=9&c=1990&ignore=.csv"; //SMI
+		$url = "http://ichart.finance.yahoo.com/table.csv?s=%5EGDAXI&d=2&e=16&f=2014&g=d&a=10&b=26&c=1990&ignore=.csv"; // DAX
 		
 		$row = 1;
 		

@@ -5,11 +5,68 @@
     "resourcePath": "/berechnungen",
     "apis": [
         {
+            "path": "/berechneRendite",
+            "operations": [
+                {
+                    "method": "POST",
+                    "summary": "Berechnet die Rendite des gewaehlten Index.",
+                    "nickname": "berechneRendite",
+                    "type": "Rendite",
+                    "parameters": [
+                        {
+                            "paramType": "form",
+                            "name": "startDatum",
+                            "type": "string",
+                            "required": true,
+                            "description": "Start Datum",
+                            "format": "date"
+                        },
+                        {
+                            "paramType": "form",
+                            "name": "endDatum",
+                            "type": "string",
+                            "required": true,
+                            "description": "End Datum",
+                            "format": "date"
+                        },
+                        {
+                            "paramType": "form",
+                            "name": "indexID",
+                            "type": "integer",
+                            "required": true,
+                            "description": "ID des Indexes"
+                        },
+                        {
+                            "paramType": "form",
+                            "name": "kapital",
+                            "type": "integer",
+                            "required": true,
+                            "description": "Startkapital"
+                        }
+                    ],
+                    "responseMessages": [
+                        {
+                            "code": 404,
+                            "message": "Bitte folgende Parameter mitliefern"
+                        },
+                        {
+                            "code": 422,
+                            "message": "Fehlerhaftes Datum"
+                        },
+                        {
+                            "code": 422,
+                            "message": "Fehlerhafte Eingabe des Kapitals"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "path": "/leseIndexe",
             "operations": [
                 {
                     "method": "GET",
-                    "summary": "Gibt die in der DB vorhandenen Indexe zur&uml;ck.",
+                    "summary": "Gibt die in der DB vorhandenen Indexe zurueck.",
                     "nickname": "leseIndexe",
                     "type": "Index",
                     "responseMessages": [
@@ -36,6 +93,44 @@
             "required": [
                 "ID",
                 "Name"
+            ]
+        },
+        "Rendite": {
+            "id": "Rendite",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "indexID": {
+                    "type": "integer"
+                },
+                "indexWerte": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "indexWerte"
+                    }
+                }
+            },
+            "required": [
+                "indexID",
+                "indexWerte",
+                "message"
+            ]
+        },
+        "indexWerte": {
+            "id": "indexWerte",
+            "properties": {
+                "tradeDate": {
+                    "type": "string",
+                    "format": "date"
+                },
+                "adjClose": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "adjClose",
+                "tradeDate"
             ]
         }
     }
