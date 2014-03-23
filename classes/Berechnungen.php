@@ -12,6 +12,8 @@ class Berechnungen {
 	private $app;
 	private $indexID = 0;
 	private $indexWerteArray = array ();
+	private $kapital = 0;
+	private $totalStueck = 0;
 	private $smaArray = array ();
 	function __construct($dbh, $app) {
 		$this->dbh = $dbh;
@@ -119,9 +121,11 @@ class Berechnungen {
 		$this->ueberpruefeDatum ( $_POST ['startDatum'] );
 		$this->ueberpruefeDatum ( $_POST ['endDatum'], $_POST ['startDatum'] );
 		$this->indexID = $this->ueberpruefeIndex ( $_POST ['indexID'] );
-		$this->ueberpruefeKapital ( $_POST ['kapital'] );
+		$this->kapital = $this->ueberpruefeKapital ( $_POST ['kapital'] );
 		
 		$this->indexWerteArray = $this->leseIndexWerte ( $this->indexID, $_POST ['startDatum'], $_POST ['endDatum'] );
+		
+		$this->berechneInvestitionen();
 		
 		// $this->smaArray = $this->berechneSMA ();
 		// "smaWerte" => $this->smaArray
@@ -175,6 +179,7 @@ class Berechnungen {
 			$kap = ( int ) $kapital;
 			if (! is_int ( $kap ))
 				throw new Exception ( "Kein Integer" );
+			return $kapital;
 		} catch ( Exception $e ) {
 			$this->app->render ( 422, array (
 					"message" => "Fehlerhafte Eingabe des Kapitals",
@@ -187,11 +192,25 @@ class Berechnungen {
 		$result = $this->dbh->leseIndexWerte ( $indexID, date ( "Y-m-d", strtotime ( $startDatum ) ), date ( "Y-m-d", strtotime ( $endDatum ) ) );
 		return $result;
 	}
+	private function berechneInvestitionen() {
+		for($i = 0; $i < count ( $this->indexWerteArray ); $i ++) {
+			if (substr($this->indexWerteArray[$i]->tradeDate, -2) == '01') {
+				$this->indexWerteArray[$i]->investition = $this->kapital;
+				$investition = ($this->kapital/$this->indexWerteArray[$i]->adjClose);
+				$this->indexWerteArray[$i]->stueck = $investition;
+				$this->totalStueck .= $investition;
+				$this->indexWerteArray[$i]->wert = $this->totalStueck*$this->indexWerteArray[$i]->adjClose;
+			}else{
+				$this->indexWerteArray[$i]->stueck = $this->totalStueck;
+				$this->indexWerteArray[$i]->wert = $this->totalStueck*$this->indexWerteArray[$i]->adjClose;
+			}
+		}
+	}
 	private function berechneVeraenderungKapital() {
 	}
 	private function berechneKumuliertesKapital() {
 	}
-	private function berechneGewinn() {
+	private function berechneGewinn() {		
 	}
 	private function berechneSMA() {
 		$result = array ();
