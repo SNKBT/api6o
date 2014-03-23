@@ -1,44 +1,73 @@
 <?php
 class YahooDaten {
 	private $dbh;
+	private $indexe = array ();
 	function __construct($dbh) {
 		$this->dbh = $dbh;
 	}
-	public function aktualisiereAlleIndexe() {
-		/**
-		 * $request = \Slim\Slim::getInstance ()->request ();
-		 * $hisPri = $request->getBody ();
-		 *
-		 * echo $hisPri->code;
-		 * echo $hisPri->startyear;
-		 * echo $hisPri->startmonth;
-		 * echo $hisPri->startday;
-		 *
-		 * $code = $hisPri->code;
-		 * $fromYear = $hisPri->startyear;
-		 * $fromMonth = $hisPri->startmonth;
-		 * $fromDay = $hisPri->startday;
-		 * $toYear = $hisPri->endyear;
-		 * $toMonth = $hisPri->endmonth;
-		 * $toDay = $hisPri->endday;
-		 *
-		 * echo "url=http://ichart.finance.yahoo.com/table.csv?s=" . $code . "&d=" . $toMonth . "&e=" . $toDay . "&f=" . $toYear . "&g=d&a=" . $fromMonth . "&b=" . $fromDay . "&c=" . $fromYear . "&ignore=.csv";
-		 */
+	public function leseDatenstand() {
+		$result = $this->dbh->leseIndexe ();
+		$this->app->render ( 200, $result );
+	}
+	public function aktualisiereIndexe($type) {
+		$letztesDatum = "";
+		if ($type == "delta") {
+			$updatedIndexes = "";
+			try {
+				$this->indexe = $this->dbh->leseIndexe ();
+				
+				for($i = 0; $i < count ( $this->indexe ); $i ++) {
+					$lastdate = $this->dbh->leseLetztesDatum ( $this->indexe [$i]->ID );
+					if ($lastdate != 0) {
+						$ld = explode ( "-", $lastdate );
+						$url = "http://ichart.finance.yahoo.com/table.csv?s=" . $this->indexe [$i]->Kuerzel . "&a=" . ($ld [1] - 1) . "&b=" . ($ld [2] + 1) . "&c=" . $ld [0] . "&d=" . (date ( "m" ) - 1) . "&e=" . (date ( "d" ) - 1) . "&f=" . date ( "Y" ) . "&g=d&ignore=.csv";
+						$row = 1;
+						$data_array = array ();
+						if (($handle = fopen ( $url, "r" )) !== FALSE) {
+							while ( ($data = fgetcsv ( $handle, 1000, "," )) !== FALSE ) {
+								$num = count ( $data );
+								for($c = 0; $c < $num; $c ++) {
+									$data_array [$row] ['tradedate'] = $data [0];
+									$data_array [$row] ['adjclose'] = $data [6];
+								}
+								$row ++;
+							}
+							fclose ( $handle );
+						}
+						array_shift ( $data_array );
+						$this->dbh->aktualisiereIndexe ( $data_array, $this->indexe [$i]->ID, "delta" );
+						$updatedIndexes .= $this->indexe [$i]->Name . ", ";
+					}
+				}
+				if ($updatedIndexes != "") {
+					$msg = "Daten von Index(e) " . substr ( $updatedIndexes, 0, - 2 ) . " wurden aktualisiert";
+					echo ($this->dbh->schreibeLog ( $msg, 1, 200 ) == "") ? $msg : "";
+				} else {
+					echo "Keine Indexe wurden aktualisiert.";
+				}
+			} catch ( PDOException $e ) {
+				$message = (DEBUG == true) ? $e->getMessage () : "DB Update fehlgeschlagen!";
+				$this->app->render ( 404, array (
+						"message" => $message,
+						"error" => true 
+				) );
+				$this->app->stop ();
+			}
+		}
+	}
+	function aktualisiereDeltaIndexe() {
 		$data_array = array ();
 		
-		//$url = "http://ichart.finance.yahoo.com/table.csv?s=%5ENDX&d=2&e=16&f=2014&g=d&a=9&b=1&c=1985&ignore=.csv"; //NASDAQ-100
-		// $url = "http://ichart.finance.yahoo.com/table.csv?s=%5ESSMI&d=2&e=16&f=2014&g=d&a=10&b=9&c=1990&ignore=.csv"; //SMI
-		$url = "http://ichart.finance.yahoo.com/table.csv?s=%5EGDAXI&d=2&e=16&f=2014&g=d&a=10&b=26&c=1990&ignore=.csv"; // DAX
+		// ACHTUNG MONTH -1 rechnen
+		
+		$url = "http://ichart.finance.yahoo.com/table.csv?s=%5EIXIC&d=1&e=19&f=2014&g=d&a=1&b=5&c=1971&ignore=.csv";
 		
 		$row = 1;
 		
 		if (($handle = fopen ( $url, "r" )) !== FALSE) {
 			while ( ($data = fgetcsv ( $handle, 1000, "," )) !== FALSE ) {
 				$num = count ( $data );
-				// echo "<p> $num Felder in Zeile $row: <br /></p>\n";
-				
 				for($c = 0; $c < $num; $c ++) {
-					// echo $data [$c] . "<br />\n";
 					$data_array [$row] ['tradedate'] = $data [0];
 					$data_array [$row] ['open'] = $data [1];
 					$data_array [$row] ['high'] = $data [2];
@@ -52,8 +81,7 @@ class YahooDaten {
 			fclose ( $handle );
 		}
 		array_shift ( $data_array );
-		$result = $this->dbh->aktualisiereAlleIndexe ( $data_array );
-		return $result;
+		$this->schreibeIndexe ( $data_array );
 	}
 }
 

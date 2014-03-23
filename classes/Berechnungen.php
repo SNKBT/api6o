@@ -36,7 +36,7 @@ class Berechnungen {
 	 */
 	public function leseIndexe() {
 		$result = $this->dbh->leseIndexe ();
-		return $result;
+		$this->app->render ( 200, $result);
 	}
 	/**
 	 * @SWG\Api(

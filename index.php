@@ -37,10 +37,10 @@ $app->post ( '/berechneRendite', function () use($berechnungen) {
 	$berechnungen->berechneRendite ();
 } );
 $app->post ( '/db/add', function () use($app, $yahooDaten) {
-	$yahooDaten->aktualisiereAlleIndexe ();
+	$yahooDaten->aktualisiereIndexe ("full");
 } );
-$app->post ( '/db/update', function () use($app, $dbh) {
-	$dbh->aktualisiereDeltaIndexe ();
+$app->get ( '/db/update', function () use($app, $yahooDaten) {
+	$yahooDaten->aktualisiereIndexe ("delta");
 } );
 $app->post ( '/testPost', function () use($app, $test) {
 	$test->testPost ();
