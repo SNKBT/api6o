@@ -38,7 +38,7 @@ class Berechnungen {
 	 */
 	public function leseIndexe() {
 		$result = $this->dbh->leseIndexe ();
-		$this->app->render ( 200, $result);
+		$this->app->render ( 200, $result );
 	}
 	/**
 	 * @SWG\Api(
@@ -125,7 +125,7 @@ class Berechnungen {
 		
 		$this->indexWerteArray = $this->leseIndexWerte ( $this->indexID, $_POST ['startDatum'], $_POST ['endDatum'] );
 		
-		$this->berechneInvestitionen();
+		$this->berechneInvestitionen ();
 		
 		// $this->smaArray = $this->berechneSMA ();
 		// "smaWerte" => $this->smaArray
@@ -193,16 +193,17 @@ class Berechnungen {
 		return $result;
 	}
 	private function berechneInvestitionen() {
-		for($i = 0; $i < count ( $this->indexWerteArray ); $i ++) {
-			if (substr($this->indexWerteArray[$i]->tradeDate, -2) == '01') {
-				$this->indexWerteArray[$i]->investition = $this->kapital;
-				$investition = ($this->kapital/$this->indexWerteArray[$i]->adjClose);
-				$this->indexWerteArray[$i]->stueck = $investition;
+		for($i = count ( $this->indexWerteArray ) - 1; $i >= 0; $i --) {
+			// for($i = 0; $i < count ( $this->indexWerteArray ); $i ++) {
+			if (substr ( $this->indexWerteArray [$i]->tradeDate, - 2 ) == '01') {
+				$this->indexWerteArray [$i]->investition = $this->kapital;
+				$investition = ($this->kapital / $this->indexWerteArray [$i]->adjClose);
+				$this->indexWerteArray [$i]->stueck = $investition;
 				$this->totalStueck .= $investition;
-				$this->indexWerteArray[$i]->wert = $this->totalStueck*$this->indexWerteArray[$i]->adjClose;
-			}else{
-				$this->indexWerteArray[$i]->stueck = $this->totalStueck;
-				$this->indexWerteArray[$i]->wert = $this->totalStueck*$this->indexWerteArray[$i]->adjClose;
+				$this->indexWerteArray [$i]->wert = $this->totalStueck * $this->indexWerteArray [$i]->adjClose;
+			} else {
+				$this->indexWerteArray [$i]->stueck = $this->totalStueck;
+				$this->indexWerteArray [$i]->wert = $this->totalStueck * $this->indexWerteArray [$i]->adjClose;
 			}
 		}
 	}
@@ -210,7 +211,7 @@ class Berechnungen {
 	}
 	private function berechneKumuliertesKapital() {
 	}
-	private function berechneGewinn() {		
+	private function berechneGewinn() {
 	}
 	private function berechneSMA() {
 		$result = array ();
