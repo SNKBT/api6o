@@ -25,7 +25,7 @@ class DbHandler {
 		}
 		try {
 			$this->conn->beginTransaction ();
-			$query = $this->conn->prepare ( "INSERT INTO log (nachricht, typ, httpCode) VALUES ('" . $nachricht . "', " . $typ . ", " . $httpCode . ")" );
+			$query = $this->conn->prepare ( "INSERT INTO log (nachricht, typ, httpCode, zeitstempel) VALUES ('" . $nachricht . "', " . $typ . ", " . $httpCode . ", NOW())" );
 			$query->execute ();
 			$this->conn->commit ();
 		} catch ( PDOException $e ) {
@@ -36,7 +36,7 @@ class DbHandler {
 	}
 	public function leseIndexe() {
 		try {
-			$query = $this->conn->prepare ( "SELECT * FROM indexe ORDER BY ID ASC" );
+			$query = $this->conn->prepare ( "SELECT * FROM indexe ORDER BY id ASC" );
 			if ($query->execute () && $query->rowCount () > 0) {
 				$result = array ();
 				$result = $query->fetchAll ( PDO::FETCH_OBJ );
@@ -55,7 +55,7 @@ class DbHandler {
 	}
 	public function pruefeIndex($indexID = NULL) {
 		try {
-			$query = $this->conn->prepare ( "SELECT ID FROM indexe WHERE ID=" . $indexID );
+			$query = $this->conn->prepare ( "SELECT id FROM indexe WHERE id=" . $indexID );
 			if ($query->execute () && $query->rowCount () > 0) {
 				return intval ( $query->fetchColumn () );
 			} else {
@@ -72,7 +72,7 @@ class DbHandler {
 	}
 	public function leseIndexWerte($indexID, $startDatum, $endDatum) {
 		try {
-			$query = $this->conn->prepare ( "SELECT tradeDate, adjClose FROM indexe_values WHERE FK_indexe_ID=" . $indexID . " AND tradeDate >='" . $startDatum . "' AND tradeDate<='" . $endDatum . "'" );
+			$query = $this->conn->prepare ( "SELECT tradeDate, adjClose FROM indexe_values WHERE fk_indexe_id=" . $indexID . " AND tradeDate >='" . $startDatum . "' AND tradeDate<='" . $endDatum . "'" );
 			if ($query->execute () && $query->rowCount () > 0) {
 				$result = array ();
 				$result = $query->fetchAll ( PDO::FETCH_OBJ );
@@ -94,7 +94,7 @@ class DbHandler {
 	}
 	public function leseLetztesDatum($id) {
 		try {
-			$query = $this->conn->prepare ( "SELECT tradeDate FROM indexe_values WHERE FK_indexe_ID=" . $id . " ORDER BY tradeDate DESC LIMIT 0,1" );
+			$query = $this->conn->prepare ( "SELECT tradeDate FROM indexe_values WHERE fk_indexe_id=" . $id . " ORDER BY tradeDate DESC LIMIT 0,1" );
 			if ($query->execute () && $query->rowCount () > 0) {
 				$letztesDatum = $query->fetchColumn ();
 				if (date ( 'N', strtotime ( $letztesDatum ) ) >= 5 || date ( 'N', strtotime ( $letztesDatum ) ) == 1) {
@@ -120,7 +120,7 @@ class DbHandler {
 			$this->loescheIndexe ( $id );
 		try {
 			$this->conn->beginTransaction ();
-			$query = $this->conn->prepare ( "INSERT INTO indexe_values (tradeDate, adjClose, FK_indexe_ID) VALUES (?, ?, " . $id . ")" );
+			$query = $this->conn->prepare ( "INSERT INTO indexe_values (tradeDate, adjClose,fk_indexe_id) VALUES (?, ?, " . $id . ")" );
 			foreach ( $data_array as $key ) {
 				$query->execute ( array (
 						$key ['tradedate'],
@@ -136,7 +136,7 @@ class DbHandler {
 	private function loescheIndexe($id) {
 		try {
 			$this->conn->beginTransaction ();
-			$query = $this->conn->prepare ( "DELETE FROM TABLE indexe_values WHERE FK_indexe_ID=" . $id );
+			$query = $this->conn->prepare ( "DELETE FROM TABLE indexe_values WHERE fk_indexe_id=" . $id );
 			$query->execute ();
 			$this->conn->commit ();
 		} catch ( PDOException $e ) {

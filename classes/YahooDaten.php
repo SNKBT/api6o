@@ -17,7 +17,7 @@ class YahooDaten {
 				$this->indexe = $this->dbh->leseIndexe ();
 				
 				for($i = 0; $i < count ( $this->indexe ); $i ++) {
-					$lastdate = $this->dbh->leseLetztesDatum ( $this->indexe [$i]->ID );
+					$lastdate = $this->dbh->leseLetztesDatum ( $this->indexe [$i]->id );
 					if ($lastdate != 0) {
 						$ld = explode ( "-", $lastdate );
 						$url = "http://ichart.finance.yahoo.com/table.csv?s=" . $this->indexe [$i]->Kuerzel . "&a=" . ($ld [1] - 1) . "&b=" . ($ld [2] + 1) . "&c=" . $ld [0] . "&d=" . (date ( "m" ) - 1) . "&e=" . (date ( "d" ) - 1) . "&f=" . date ( "Y" ) . "&g=d&ignore=.csv";
@@ -35,7 +35,7 @@ class YahooDaten {
 							fclose ( $handle );
 						}
 						array_shift ( $data_array );
-						$this->dbh->aktualisiereIndexe ( $data_array, $this->indexe [$i]->ID, "delta" );
+						$this->dbh->aktualisiereIndexe ( $data_array, $this->indexe [$i]->id, "delta" );
 						$updatedIndexes .= $this->indexe [$i]->Name . ", ";
 					}
 				}
