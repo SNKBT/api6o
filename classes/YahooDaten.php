@@ -20,7 +20,7 @@ class YahooDaten {
 					$lastdate = $this->dbh->leseLetztesDatum ( $this->indexe [$i]->id );
 					if ($lastdate != 0) {
 						$ld = explode ( "-", $lastdate );
-						$url = "http://ichart.finance.yahoo.com/table.csv?s=" . $this->indexe [$i]->Kuerzel . "&a=" . ($ld [1] - 1) . "&b=" . ($ld [2] + 1) . "&c=" . $ld [0] . "&d=" . (date ( "m" ) - 1) . "&e=" . (date ( "d" ) - 1) . "&f=" . date ( "Y" ) . "&g=d&ignore=.csv";
+						$url = "http://ichart.finance.yahoo.com/table.csv?s=" . $this->indexe [$i]->kuerzel . "&a=" . ($ld [1] - 1) . "&b=" . ($ld [2] + 1) . "&c=" . $ld [0] . "&d=" . (date ( "m" ) - 1) . "&e=" . (date ( "d" ) - 1) . "&f=" . date ( "Y" ) . "&g=d&ignore=.csv";
 						$row = 1;
 						$data_array = array ();
 						if (($handle = fopen ( $url, "r" )) !== FALSE) {
