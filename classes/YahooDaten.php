@@ -36,7 +36,7 @@ class YahooDaten {
 						}
 						array_shift ( $data_array );
 						$this->dbh->aktualisiereIndexe ( $data_array, $this->indexe [$i]->id, "delta" );
-						$updatedIndexes .= $this->indexe [$i]->Name . ", ";
+						$updatedIndexes .= $this->indexe [$i]->name . ", ";
 					}
 				}
 				if ($updatedIndexes != "") {
