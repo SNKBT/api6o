@@ -197,13 +197,13 @@ class Berechnungen {
 			// for($i = 0; $i < count ( $this->indexWerteArray ); $i ++) {
 			if (substr ( $this->indexWerteArray [$i]->tradeDate, - 2 ) == '01') {
 				$this->indexWerteArray [$i]->investition = $this->kapital;
-				$investition = ($this->kapital / $this->indexWerteArray [$i]->adjClose);
+				$investition = round(($this->kapital / $this->indexWerteArray [$i]->adjClose),4);
 				$this->indexWerteArray [$i]->stueck = $investition;
 				$this->totalStueck .= $investition;
-				$this->indexWerteArray [$i]->wert = $this->totalStueck * $this->indexWerteArray [$i]->adjClose;
+				$this->indexWerteArray [$i]->wert = round($this->totalStueck * $this->indexWerteArray [$i]->adjClose,4);
 			} else {
 				$this->indexWerteArray [$i]->stueck = $this->totalStueck;
-				$this->indexWerteArray [$i]->wert = $this->totalStueck * $this->indexWerteArray [$i]->adjClose;
+				$this->indexWerteArray [$i]->wert = round($this->totalStueck * $this->indexWerteArray [$i]->adjClose,4);
 			}
 		}
 	}
