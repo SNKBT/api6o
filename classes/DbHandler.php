@@ -97,10 +97,14 @@ class DbHandler {
 			$query = $this->conn->prepare ( "SELECT tradeDate FROM indexe_values WHERE fk_indexe_id=" . $id . " ORDER BY tradeDate DESC LIMIT 0,1" );
 			if ($query->execute () && $query->rowCount () > 0) {
 				$letztesDatum = $query->fetchColumn ();
-				if (date ( 'N', strtotime ( $letztesDatum ) ) >= 5 || date ( 'N', strtotime ( $letztesDatum ) ) == 1) {
-					return 0;
-				} elseif (date ( 'G' ) < 8 && $letztesDatum == date ( "Y" ) . "-" . date ( "m" ) . "-" . (date ( "d" ) - 1)) {
-					return 0;
+				
+				$n = date ( "Y" ) . "-" . date ( "m" ) . "-" . (date ( "d" ) - 1);
+				if (date ( "j", (strtotime ( $n ) - strtotime ( $letztesDatum )) ) < 7) {
+					if (date ( 'N', strtotime ( $letztesDatum ) ) >= 5 || date ( 'N', strtotime ( $letztesDatum ) ) == 1) {
+						return 0;
+					} elseif (date ( 'G' ) < 8 && $letztesDatum == date ( "Y" ) . "-" . date ( "m" ) . "-" . (date ( "d" ) - 1)) {
+						return 0;
+					}
 				}
 				return $letztesDatum;
 			} else {
@@ -129,8 +133,13 @@ class DbHandler {
 			}
 			$this->conn->commit ();
 		} catch ( PDOException $e ) {
-			echo '{"error":{"text":' . $e->getMessage () . '}}';
+			$message = (DEBUG == true) ? $e->getMessage () : "Es konnten keine Index Werte eingetragen werden.";
 			$this->conn->rollBack ();
+			$this->app->render ( 404, array (
+					"message" => $message,
+					"error" => true
+			) );
+			$this->app->stop ();
 		}
 	}
 	private function loescheIndexe($id) {
