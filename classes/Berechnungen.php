@@ -198,8 +198,8 @@ class Berechnungen {
 			if (substr ( $this->indexWerteArray [$i]->tradeDate, - 2 ) == '01') {
 				$this->indexWerteArray [$i]->investition = $this->kapital;
 				$investition = round(($this->kapital / $this->indexWerteArray [$i]->adjClose),4);
-				$this->indexWerteArray [$i]->stueck = $investition;
-				$this->totalStueck .= $investition;
+				$this->totalStueck = ($this->totalStueck + $investition);
+				$this->indexWerteArray [$i]->stueck = $this->totalStueck;
 				$this->indexWerteArray [$i]->wert = round($this->totalStueck * $this->indexWerteArray [$i]->adjClose,4);
 			} else {
 				$this->indexWerteArray [$i]->stueck = $this->totalStueck;
