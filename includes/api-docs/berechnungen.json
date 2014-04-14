@@ -11,7 +11,7 @@
                     "method": "POST",
                     "summary": "Berechnet die Rendite des gewaehlten Index.",
                     "nickname": "berechneRendite",
-                    "type": "Rendite",
+                    "type": "berechneRendite",
                     "parameters": [
                         {
                             "paramType": "form",
@@ -38,10 +38,17 @@
                         },
                         {
                             "paramType": "form",
-                            "name": "kapital",
+                            "name": "startkapital",
                             "type": "integer",
                             "required": true,
                             "description": "Startkapital"
+                        },
+                        {
+                            "paramType": "form",
+                            "name": "rente_auszahlung",
+                            "type": "integer",
+                            "required": true,
+                            "description": "Rente oder Auszahlung"
                         }
                     ],
                     "responseMessages": [
@@ -95,8 +102,8 @@
                 "Name"
             ]
         },
-        "Rendite": {
-            "id": "Rendite",
+        "berechneRendite": {
+            "id": "berechneRendite",
             "properties": {
                 "message": {
                     "type": "string"

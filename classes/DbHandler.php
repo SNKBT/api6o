@@ -115,6 +115,7 @@ class DbHandler {
 		}
 		return $letztesDatum;
 	}
+	
 	private function schreibeIndexe($data_array, $id, $type) {
 		if (empty ( $data_array ) || ! is_numeric ( $id )) {
 			echo '{"error":{"text":"Array ist leer!"}}';
