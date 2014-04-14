@@ -133,19 +133,20 @@ class Berechnungen {
 		$this->ueberpruefeDatum ( $_POST ['endDatum'], $_POST ['startDatum'] );
 		$this->indexID = $this->ueberpruefeIndex ( $_POST ['indexID'] );
 		$this->startkapital = $this->ueberpruefeKapital ( $_POST ['startkapital'], "startkapital" );
+		
 		$this->rente_auszahlung = $this->ueberpruefeKapital ( $_POST ['rente_auszahlung'], "rente_auszahlung" );
 		$this->kapital = $this->startkapital;
 		
 		$this->indexWerteArray = $this->leseIndexWerte ( $this->indexID, $_POST ['startDatum'], $_POST ['endDatum'] );
 		
-		// $this->berechneInvestitionen();
+		$this->totalStueck = 0;
 		
-		$this->totalStueck = 1.6;
+		//$this->berechneStartkapital ();
 		
 		if ($this->rente_auszahlung >= 0) {
-			$this->berechneZahlungen ("einzahlung");
+			$this->berechneZahlungen ( "einzahlung" );
 		} else {
-			$this->berechneZahlungen ("auszahlung");
+			$this->berechneZahlungen ( "auszahlung" );
 		}
 		
 		// $this->smaArray = $this->berechneSMA ();
@@ -202,7 +203,7 @@ class Berechnungen {
 				throw new Exception ( "Kein Integer" );
 			if (($test == "startkapital" && $kapital < 0) || $test == "startkapital" && $kapital > 100000)
 				throw new Exception ( "Ungueltiges Startkapital" );
-			if (($test == "rente_auszahlung" && $kapital < -10000) || ($test == "rente_auszahlung" && $kapital > 10000))
+			if (($test == "rente_auszahlung" && $kapital < - 10000) || ($test == "rente_auszahlung" && $kapital > 10000))
 				throw new Exception ( "Ungueltiges Startkapital" );
 			return $kapital;
 		} catch ( Exception $e ) {
@@ -217,55 +218,70 @@ class Berechnungen {
 		$result = $this->dbh->leseIndexWerte ( $indexID, date ( "Y-m-d", strtotime ( $startDatum ) ), date ( "Y-m-d", strtotime ( $endDatum ) ) );
 		return $result;
 	}
-	private function berechneInvestitionen() {
+	private function berechneStartkapital() {
+		$zahlungen = ($this->startkapital / 4);
+		
 		for($i = count ( $this->indexWerteArray ) - 1; $i >= 0; $i --) {
-			if (substr ( $this->indexWerteArray [$i]->tradeDate, - 2 ) == '01') {
-				$this->indexWerteArray [$i]->investition = $this->startkapital;
-				$investition = round ( ($this->startkapital / $this->indexWerteArray [$i]->adjClose), 4 );
-				$this->totalStueck = ($this->totalStueck + $investition);
-				$this->indexWerteArray [$i]->stueck = $this->totalStueck;
-				$this->indexWerteArray [$i]->wert = round ( $this->totalStueck * $this->indexWerteArray [$i]->adjClose, 4 );
-			} else {
-				$this->indexWerteArray [$i]->stueck = $this->totalStueck;
-				$this->indexWerteArray [$i]->wert = round ( $this->totalStueck * $this->indexWerteArray [$i]->adjClose, 4 );
+			if ($this->startkapital <= 0) {
+				break;
+			}
+			if ((date ( 'N', strtotime ( $this->indexWerteArray [$i]->tradeDate ) ) == 1) && ($this->startkurs == 0)) {
+				$this->startkurs = $this->indexWerteArray [$i]->adjClose;
+				$this->zahleEin ( $i, $zahlungen );
+				$this->startkapital = ($this->startkapital - $zahlungen);
+			} elseif ((date ( 'N', strtotime ( $this->indexWerteArray [$i]->tradeDate ) ) == 1) && ($this->indexWerteArray [$i]->adjClose >= $this->startkurs)) {
+				$this->zahleEin ( $i, $zahlungen );
+				$this->startkapital = ($this->startkapital - $zahlungen);
 			}
 		}
 	}
 	private function berechneZahlungen($zahlung) {
 		
+		$startKap = ($this->startkapital / 4);
+		
 		for($i = count ( $this->indexWerteArray ) - 1; $i >= 0; $i --) {
 			
+			if ((date ( 'N', strtotime ( $this->indexWerteArray [$i]->tradeDate ) ) == 1) && ($this->startkurs == 0)  && ($this->startkapital > 0)) {
+				$this->startkurs = $this->indexWerteArray [$i]->adjClose;
+				$this->zahleEin ( $i, $startKap );
+				$this->startkapital = ($this->startkapital - $startKap);
+			} elseif ((date ( 'N', strtotime ( $this->indexWerteArray [$i]->tradeDate ) ) == 1) && ($this->indexWerteArray [$i]->adjClose >= $this->startkurs) && ($this->startkapital > 0)) {
+				$this->zahleEin ( $i, $startKap );
+				$this->startkapital = ($this->startkapital - $startKap);
+			}
+			
 			$tag = substr ( $this->indexWerteArray [$i]->tradeDate, - 2 );
-			$monat = substr( $this->indexWerteArray [$i]->tradeDate , 5, 2);
-			$letzterMonat = ($i < (count($this->indexWerteArray )-1)) ? substr( $this->indexWerteArray [$i+1]->tradeDate , 5, 2) : $monat;
+			$monat = substr ( $this->indexWerteArray [$i]->tradeDate, 5, 2 );
+			$letzterMonat = ($i < (count ( $this->indexWerteArray ) - 1)) ? substr ( $this->indexWerteArray [$i + 1]->tradeDate, 5, 2 ) : $monat;
 			
 			if ($letzterMonat != $monat) {
-				if ($zahlung = "auszahlung") { 
-					$this->zahleAus($i);
-				} elseif ($zahlung = "einzahlung") { 
-					$this->zahleEin($i);
+				if ($zahlung == "auszahlung") {
+					$this->zahleAus ( $i );
+				} elseif ($zahlung == "einzahlung") {
+					$this->zahleEin ( $i, $this->rente_auszahlung );
 				}
 			} else {
-				$this->berechneStueckUndWert($i);
+				$this->berechneStueckUndWert ( $i );
 			}
 		}
 	}
-	
 	private function zahleAus($i) {
-		if ((($this->totalStueck*$this->indexWerteArray [$i]->adjClose) + $this->rente_auszahlung) > 0) {
+		if ((($this->totalStueck * $this->indexWerteArray [$i]->adjClose) + $this->rente_auszahlung) > 0) {
 			$this->indexWerteArray [$i]->desinvestition = $this->rente_auszahlung;
 			$investition = round ( ($this->rente_auszahlung / $this->indexWerteArray [$i]->adjClose), 4 );
 			$this->totalStueck = ($this->totalStueck + $investition);
 		}
-		$this->berechneStueckUndWert($i);
+		$this->berechneStueckUndWert ( $i );
 	}
-	private function zahleEin($i) {
-		$this->indexWerteArray [$i]->investition = $this->rente_auszahlung;
-		$investition = round ( ($this->rente_auszahlung / $this->indexWerteArray [$i]->adjClose), 4 );
-		$this->totalStueck = ($this->totalStueck + $investition);
-		$this->berechneStueckUndWert($i);
+	private function zahleEin($i, $kapital) {
+		if ($kapital >= 0) {
+			$this->indexWerteArray [$i]->investition = $kapital;
+			$investition = round ( ($kapital / $this->indexWerteArray [$i]->adjClose), 4 );
+			$this->totalStueck = ($this->totalStueck + $investition);
+			$this->berechneStueckUndWert ( $i );
+		}
 	}
-	private function berechneStueckUndWert ($i) {
+	private function berechneStueckUndWert($i) {
 		$this->indexWerteArray [$i]->stueck = $this->totalStueck;
 		$this->indexWerteArray [$i]->wert = round ( $this->totalStueck * $this->indexWerteArray [$i]->adjClose, 4 );
 	}
