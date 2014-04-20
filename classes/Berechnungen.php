@@ -170,14 +170,15 @@ class Berechnungen {
 	}
 	private function ueberpruefeDatum($datum, $startDatum = NULL) {
 		try {
-			$cdate = explode ( ".", $datum );
-			checkdate ( $cdate [1], $cdate [0], $cdate [2] );
+			$cdate = explode ( "-", $datum );
+			checkdate ( $cdate [1], $cdate [2], $cdate [0] );
+			
 			$now = new DateTime ();
-			$date = DateTime::createFromFormat ( 'j.m.Y', $datum );
+			$date = DateTime::createFromFormat ( 'Y-m-j', $datum );
 			if ($date >= $now)
 				throw new Exception ( "Datum ist in der Zukunft" );
 			if ($startDatum != NULL) {
-				$start = DateTime::createFromFormat ( 'j.m.Y', $startDatum );
+				$start = DateTime::createFromFormat ( 'Y-m-j', $startDatum );
 				if ($date <= $start) {
 					throw new Exception ( "Enddatum ist frueher als Startdatum" );
 				}
