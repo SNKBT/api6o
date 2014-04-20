@@ -90,16 +90,43 @@
         "Index": {
             "id": "Index",
             "properties": {
-                "ID": {
-                    "type": "integer"
+                "leseIndexe": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "leseIndexe"
+                    }
                 },
-                "Name": {
+                "error": {
+                    "type": "boolean"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "error",
+                "leseIndexe",
+                "status"
+            ]
+        },
+        "leseIndexe": {
+            "id": "leseIndexe",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "format": "date"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "kuerzel": {
                     "type": "string"
                 }
             },
             "required": [
-                "ID",
-                "Name"
+                "id",
+                "kuerzel",
+                "name"
             ]
         },
         "berechneRendite": {

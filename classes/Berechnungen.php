@@ -36,11 +36,17 @@ class Berechnungen {
 	 * )
 	 * )
 	 * @SWG\Model(id="Index")
-	 * @SWG\Property(name="ID",type="integer",required=true)
-	 * @SWG\Property(name="Name",type="string",required=true)
+	 * @SWG\Property(name="leseIndexe",type="array",required=true,@SWG\Items("leseIndexe"))
+	 * @SWG\Property(name="error",type="boolean",required=true)
+	 * @SWG\Property(name="status",type="integer",required=true)
+	 * @SWG\Model(id="leseIndexe")
+	 * @SWG\Property(name="id",type="string",format="date",required=true)
+	 * @SWG\Property(name="name",type="string",required=true)
+	 * @SWG\Property(name="kuerzel",type="string",required=true)
 	 */
 	public function leseIndexe() {
-		$result = $this->dbh->leseIndexe ();
+		$result = array();
+		$result['leseIndexe'] = $this->dbh->leseIndexe ();
 		$this->app->render ( 200, $result );
 	}
 	/**
@@ -117,7 +123,7 @@ class Berechnungen {
 		$missingPost = "";
 		$missingPost .= (! isset ( $_POST ['startDatum'] )) ? "startDatum, " : "";
 		$missingPost .= (! isset ( $_POST ['endDatum'] )) ? "endDatum, " : "";
-		$missingPost .= (! isset ( $_POST ['indexID'] )) ? "indexID, " : "";
+		$missingPost .= (! isset ( $_POST ['indexID'] ) || ! is_numeric ($_POST ['indexID'])) ? "indexID, " : "";
 		$missingPost .= (! isset ( $_POST ['startkapital'] )) ? "startkapital, " : "";
 		$missingPost .= (! isset ( $_POST ['rente_auszahlung'] )) ? "rente_auszahlung, " : "";
 		
@@ -205,7 +211,7 @@ class Berechnungen {
 			if (($test == "startkapital" && $kapital < 0) || $test == "startkapital" && $kapital > 100000)
 				throw new Exception ( "Ungueltiges Startkapital" );
 			if (($test == "rente_auszahlung" && $kapital < - 10000) || ($test == "rente_auszahlung" && $kapital > 10000))
-				throw new Exception ( "Ungueltiges Startkapital" );
+				throw new Exception ( "Ungueltiges Rente-/Auszahlungskapital" );
 			return $kapital;
 		} catch ( Exception $e ) {
 			$this->app->render ( 422, array (
