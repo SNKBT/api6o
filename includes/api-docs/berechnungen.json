@@ -39,16 +39,28 @@
                         {
                             "paramType": "form",
                             "name": "startkapital",
-                            "type": "integer",
+                            "type": "double",
                             "required": true,
                             "description": "Startkapital"
                         },
                         {
                             "paramType": "form",
                             "name": "rente_auszahlung",
-                            "type": "integer",
+                            "type": "double",
                             "required": true,
                             "description": "Rente oder Auszahlung"
+                        },
+                        {
+                            "paramType": "form",
+                            "name": "buySMA",
+                            "type": "integer",
+                            "description": "Buy SMA"
+                        },
+                        {
+                            "paramType": "form",
+                            "name": "sellSMA",
+                            "type": "integer",
+                            "description": "Sell SMA"
                         }
                     ],
                     "responseMessages": [
@@ -57,12 +69,24 @@
                             "message": "Bitte folgende Parameter mitliefern"
                         },
                         {
+                            "code": 404,
+                            "message": "Index nicht gefunden"
+                        },
+                        {
+                            "code": 404,
+                            "message": "Keine Indexwerte in diesem Zeitraum gefunden"
+                        },
+                        {
                             "code": 422,
                             "message": "Fehlerhaftes Datum"
                         },
                         {
                             "code": 422,
                             "message": "Fehlerhafte Eingabe des Kapitals"
+                        },
+                        {
+                            "code": 422,
+                            "message": "Fehlerhafte Eingabe des SMA Wertes"
                         }
                     ]
                 }
@@ -135,6 +159,21 @@
                 "message": {
                     "type": "string"
                 },
+                "gesamtrenditeIndex": {
+                    "type": "double"
+                },
+                "gesamtrenditeKapital": {
+                    "type": "double"
+                },
+                "veraenderungStartkapital": {
+                    "type": "double"
+                },
+                "veraenderungStartkapitalGeld": {
+                    "type": "double"
+                },
+                "totalRenteeinzahlungen": {
+                    "type": "double"
+                },
                 "indexID": {
                     "type": "integer"
                 },
@@ -146,9 +185,14 @@
                 }
             },
             "required": [
+                "gesamtrenditeIndex",
+                "gesamtrenditeKapital",
                 "indexID",
                 "indexWerte",
-                "message"
+                "message",
+                "totalRenteeinzahlungen",
+                "veraenderungStartkapital",
+                "veraenderungStartkapitalGeld"
             ]
         },
         "indexWerte": {
@@ -159,12 +203,26 @@
                     "format": "date"
                 },
                 "adjClose": {
-                    "type": "integer"
+                    "type": "double"
+                },
+                "anteile": {
+                    "type": "double"
+                },
+                "wert": {
+                    "type": "double"
+                },
+                "buySMA": {
+                    "type": "double"
+                },
+                "sellSMA": {
+                    "type": "double"
                 }
             },
             "required": [
                 "adjClose",
-                "tradeDate"
+                "anteile",
+                "tradeDate",
+                "wert"
             ]
         }
     }

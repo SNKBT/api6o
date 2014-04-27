@@ -13,11 +13,20 @@ class Berechnungen {
 	private $indexID = 0;
 	private $indexWerteArray = array ();
 	private $startkapital = 0;
+	private $totalStartkapital = 0;
 	private $startkurs = 0;
+	private $fistAdjClose = 0;
+	private $lastAdjClose = 0;
 	private $rente_auszahlung = 0;
-	private $totalStueck = 0;
-	private $kapital = 0;
-	private $smaArray = array ();
+	private $total_rente_auszahlung = 0;
+	private $totalAnteile = 0;
+	private $gesamtrenditeIndex = 0;
+	private $gesamtrenditeKapital = 0;
+	private $veraenderungStartkapitalProzent = 0;
+	private $veraenderungStartkapital = 0;
+	private $totalRenteeinzahlungen = 0;
+	private $buySMA = 0;
+	private $sellSMA = 0;
 	function __construct($dbh, $app) {
 		$this->dbh = $dbh;
 		$this->app = $app;
@@ -45,8 +54,8 @@ class Berechnungen {
 	 * @SWG\Property(name="kuerzel",type="string",required=true)
 	 */
 	public function leseIndexe() {
-		$result = array();
-		$result['leseIndexe'] = $this->dbh->leseIndexe ();
+		$result = array ();
+		$result ['leseIndexe'] = $this->dbh->leseIndexe ();
 		$this->app->render ( 200, $result );
 	}
 	/**
@@ -85,30 +94,54 @@ class Berechnungen {
 	 * description="Startkapital",
 	 * paramType="form",
 	 * required=true,
-	 * type="integer"
+	 * type="double"
 	 * ),
 	 * @SWG\Parameter(
 	 * name="rente_auszahlung",
 	 * description="Rente oder Auszahlung",
 	 * paramType="form",
 	 * required=true,
+	 * type="double"
+	 * ),
+	 * @SWG\Parameter(
+	 * name="buySMA",
+	 * description="Buy SMA",
+	 * paramType="form",
+	 * type="integer"
+	 * ),
+	 * @SWG\Parameter(
+	 * name="sellSMA",
+	 * description="Sell SMA",
+	 * paramType="form",
 	 * type="integer"
 	 * )
 	 * ),
 	 * @SWG\ResponseMessages(
 	 * @SWG\ResponseMessage(message="Bitte folgende Parameter mitliefern",code=404),
+	 * @SWG\ResponseMessage(message="Index nicht gefunden",code=404),
+	 * @SWG\ResponseMessage(message="Keine Indexwerte in diesem Zeitraum gefunden",code=404),
 	 * @SWG\ResponseMessage(message="Fehlerhaftes Datum",code=422),
-	 * @SWG\ResponseMessage(message="Fehlerhafte Eingabe des Kapitals",code=422)
+	 * @SWG\ResponseMessage(message="Fehlerhafte Eingabe des Kapitals",code=422),
+	 * @SWG\ResponseMessage(message="Fehlerhafte Eingabe des SMA Wertes",code=422)
 	 * )
 	 * )
 	 * )
 	 * @SWG\Model(id="berechneRendite")
 	 * @SWG\Property(name="message",type="string",required=true)
+	 * @SWG\Property(name="gesamtrenditeIndex",type="double",required=true)
+	 * @SWG\Property(name="gesamtrenditeKapital",type="double",required=true)
+	 * @SWG\Property(name="veraenderungStartkapital",type="double",required=true)
+	 * @SWG\Property(name="veraenderungStartkapitalGeld",type="double",required=true)
+	 * @SWG\Property(name="totalRenteeinzahlungen",type="double",required=true)
 	 * @SWG\Property(name="indexID",type="integer",required=true)
 	 * @SWG\Property(name="indexWerte",type="array",required=true,@SWG\Items("indexWerte"))
 	 * @SWG\Model(id="indexWerte")
 	 * @SWG\Property(name="tradeDate",type="string",format="date",required=true)
-	 * @SWG\Property(name="adjClose",type="integer",required=true)
+	 * @SWG\Property(name="adjClose",type="double",required=true)
+	 * @SWG\Property(name="anteile",type="double",required=true)
+	 * @SWG\Property(name="wert",type="double",required=true)
+	 * @SWG\Property(name="buySMA",type="double")
+	 * @SWG\Property(name="sellSMA",type="double")
 	 */
 	public function berechneRendite() {
 		if ($_SERVER ['REQUEST_METHOD'] != 'POST') {
@@ -123,7 +156,7 @@ class Berechnungen {
 		$missingPost = "";
 		$missingPost .= (! isset ( $_POST ['startDatum'] )) ? "startDatum, " : "";
 		$missingPost .= (! isset ( $_POST ['endDatum'] )) ? "endDatum, " : "";
-		$missingPost .= (! isset ( $_POST ['indexID'] ) || ! is_numeric ($_POST ['indexID'])) ? "indexID, " : "";
+		$missingPost .= (! isset ( $_POST ['indexID'] ) || ! is_numeric ( $_POST ['indexID'] )) ? "indexID, " : "";
 		$missingPost .= (! isset ( $_POST ['startkapital'] )) ? "startkapital, " : "";
 		$missingPost .= (! isset ( $_POST ['rente_auszahlung'] )) ? "rente_auszahlung, " : "";
 		
@@ -141,13 +174,14 @@ class Berechnungen {
 		$this->startkapital = $this->ueberpruefeKapital ( $_POST ['startkapital'], "startkapital" );
 		
 		$this->rente_auszahlung = $this->ueberpruefeKapital ( $_POST ['rente_auszahlung'], "rente_auszahlung" );
-		$this->kapital = $this->startkapital;
+		$this->totalStartkapital = $this->startkapital;
+		
+		$this->buySMA = (isset ( $_POST ['buySMA'] )) ? $this->ueberpruefeSMA ( $_POST ['buySMA'] ) : null;
+		$this->sellSMA = (isset ( $_POST ['sellSMA'] )) ? $this->ueberpruefeSMA ( $_POST ['sellSMA'] ) : null;
 		
 		$this->indexWerteArray = $this->leseIndexWerte ( $this->indexID, $_POST ['startDatum'], $_POST ['endDatum'] );
 		
-		$this->totalStueck = 0;
-		
-		//$this->berechneStartkapital ();
+		$this->totalAnteile = 0;
 		
 		if ($this->rente_auszahlung >= 0) {
 			$this->berechneZahlungen ( "einzahlung" );
@@ -155,30 +189,24 @@ class Berechnungen {
 			$this->berechneZahlungen ( "auszahlung" );
 		}
 		
-		// $this->smaArray = $this->berechneSMA ();
-		// "smaWerte" => $this->smaArray
-		
-		// leseIndexDaten ();
-		
-		// berechneVeraenderungKapital ();
-		
-		// berechneKumuliertesKapital ();
-		
-		// berechneGewinn ();
-		
-		// berechneDurchbrueche ();
-		
+		// ---- START AUSGABE ----
 		$this->app->render ( 200, array (
-				"message" => "SCOOOOOOOOORE",
+				"message" => "Performance Index",
+				"gesamtrenditeIndex" => $this->berechneGesamtrenditeIndex (),
+				"gesamtrenditeKapital" => $this->berechneGesamtrenditeKapital (),
+				"veraenderungStartkapital" => $this->berechneVeraenderungStartkapital (),
+				"veraenderungStartkapitalGeld" => $this->berechneVeraenderungStartkapitalGeld (),
+				"totalRenteeinzahlungen" => $this->totalRenteeinzahlungen,
 				"indexID" => $this->indexID,
 				"indexWerte" => $this->indexWerteArray 
 		) );
+		// ---- ENDE AUSGABE ----
 	}
 	private function ueberpruefeDatum($datum, $startDatum = NULL) {
 		try {
 			$cdate = explode ( "-", $datum );
-			checkdate ( $cdate [1], $cdate [2], $cdate [0] );
-			
+			if (checkdate ( $cdate [1], $cdate [2], $cdate [0] ) != true)
+				throw new Exception ( "Fehlerhaftes Datum" );
 			$now = new DateTime ();
 			$date = DateTime::createFromFormat ( 'Y-m-j', $datum );
 			if ($date >= $now)
@@ -221,6 +249,26 @@ class Berechnungen {
 			$this->app->stop ();
 		}
 	}
+	private function ueberpruefeSMA($sma) {
+		try {
+			if (! is_numeric ( $sma ))
+				throw new Exception ( "Kein Integer" );
+			$intsma = ( int ) $sma;
+			if (! is_int ( $intsma ))
+				throw new Exception ( "Kein Integer" );
+			if (strpos ( $sma, "." ) || strpos ( $sma, "," ))
+				throw new Exception ( "Kein Integer" );
+			if (($sma < 2) || ($sma > 500))
+				throw new Exception ( "Ungueltiger SMA Wert" );
+			return $sma;
+		} catch ( Exception $e ) {
+			$this->app->render ( 422, array (
+					"message" => "Fehlerhafte Eingabe des SMA Wertes",
+					"error" => true 
+			) );
+			$this->app->stop ();
+		}
+	}
 	public function leseIndexWerte($indexID, $startDatum, $endDatum) {
 		$result = $this->dbh->leseIndexWerte ( $indexID, date ( "Y-m-d", strtotime ( $startDatum ) ), date ( "Y-m-d", strtotime ( $endDatum ) ) );
 		return $result;
@@ -243,12 +291,11 @@ class Berechnungen {
 		}
 	}
 	private function berechneZahlungen($zahlung) {
-		
 		$startKap = ($this->startkapital / 4);
 		
 		for($i = count ( $this->indexWerteArray ) - 1; $i >= 0; $i --) {
 			
-			if ((date ( 'N', strtotime ( $this->indexWerteArray [$i]->tradeDate ) ) == 1) && ($this->startkurs == 0)  && ($this->startkapital > 0)) {
+			if ((date ( 'N', strtotime ( $this->indexWerteArray [$i]->tradeDate ) ) == 1) && ($this->startkurs == 0) && ($this->startkapital > 0)) {
 				$this->startkurs = $this->indexWerteArray [$i]->adjClose;
 				$this->zahleEin ( $i, $startKap );
 				$this->startkapital = ($this->startkapital - $startKap);
@@ -268,46 +315,65 @@ class Berechnungen {
 					$this->zahleEin ( $i, $this->rente_auszahlung );
 				}
 			} else {
-				$this->berechneStueckUndWert ( $i );
+				$this->berechneAnteilUndWert ( $i );
 			}
+			if ($i == (count ( $this->indexWerteArray ) - 1)) {
+				$this->firstAdjClose = $this->indexWerteArray [$i]->adjClose;
+			}
+			if ($i == 0) {
+				$this->lastAdjClose = $this->indexWerteArray [$i]->adjClose;
+			}
+			if ($this->buySMA != null)
+				$this->indexWerteArray [$i]->buySMA = $this->berechneSMA ( $i );
+			if ($this->sellSMA != null)
+				$this->indexWerteArray [$i]->sellSMA = $this->berechneSMA ( $i );
 		}
 	}
 	private function zahleAus($i) {
-		if ((($this->totalStueck * $this->indexWerteArray [$i]->adjClose) + $this->rente_auszahlung) > 0) {
+		if ((($this->totalAnteile * $this->indexWerteArray [$i]->adjClose) + $this->rente_auszahlung) > 0) {
 			$this->indexWerteArray [$i]->desinvestition = $this->rente_auszahlung;
 			$investition = round ( ($this->rente_auszahlung / $this->indexWerteArray [$i]->adjClose), 4 );
-			$this->totalStueck = ($this->totalStueck + $investition);
+			$this->totalAnteile = ($this->totalAnteile + $investition);
 		}
-		$this->berechneStueckUndWert ( $i );
+		$this->berechneAnteilUndWert ( $i );
 	}
 	private function zahleEin($i, $kapital) {
 		if ($kapital >= 0) {
 			$this->indexWerteArray [$i]->investition = $kapital;
+			$this->totalRenteeinzahlungen += $kapital;
 			$investition = round ( ($kapital / $this->indexWerteArray [$i]->adjClose), 4 );
-			$this->totalStueck = ($this->totalStueck + $investition);
-			$this->berechneStueckUndWert ( $i );
+			$this->totalAnteile = ($this->totalAnteile + $investition);
+			$this->berechneAnteilUndWert ( $i );
 		}
 	}
-	private function berechneStueckUndWert($i) {
-		$this->indexWerteArray [$i]->stueck = $this->totalStueck;
-		$this->indexWerteArray [$i]->wert = round ( $this->totalStueck * $this->indexWerteArray [$i]->adjClose, 4 );
+	private function berechneAnteilUndWert($i) {
+		$this->indexWerteArray [$i]->anteile = $this->totalAnteile;
+		$this->indexWerteArray [$i]->wert = round ( $this->totalAnteile * $this->indexWerteArray [$i]->adjClose, 4 );
 	}
-	private function berechneVeraenderungKapital() {
+	private function berechneGesamtrenditeIndex() {
+		$return = ($this->firstAdjClose > 0) ? round ( (($this->lastAdjClose / $this->firstAdjClose) * 100), 2 ) : null;
+		return $return;
 	}
-	private function berechneKumuliertesKapital() {
+	private function berechneGesamtrenditeKapital() {
+		$return = ($this->firstAdjClose > 0) ? round ( ((($this->totalAnteile * $this->lastAdjClose) / ($this->totalRenteeinzahlungen + $this->totalStartkapital)) * 100), 2 ) : null;
+		return $return;
 	}
-	private function berechneGewinn() {
+	private function berechneVeraenderungStartkapital() {
+		$return = ($this->totalStartkapital > 0) ? round ( ((($this->totalAnteile * $this->lastAdjClose) / $this->totalStartkapital) * 100), 2 ) : null;
+		return $return;
 	}
-	private function berechneSMA() {
-		$result = array ();
-		$ar = count ( $this->indexWerteArray );
-		for($i = 0; $i < $ar; $i ++) {
-			$a = 0;
-			for($e = $i; $e < 5; $e ++) {
-				$a += $this->indexWerteArray [$e]->adjClose;
-			}
-			$result [$i] = (($a) / 5);
+	private function berechneVeraenderungStartkapitalGeld() {
+		$return = ($this->totalStartkapital > 0) ? round ( (($this->totalAnteile * $this->lastAdjClose) - $this->totalStartkapital), 2 ) : null;
+		return $return;
+	}
+	private function berechneSMA($i) {
+		$result = 0;
+		$sum = 0;
+		for($n = 0; $n < $this->buySMA; $n ++) {
+			$arr = ($i < (count ( $this->indexWerteArray ) - 1)) ? ($i + $n) : $i;
+			$sum += $this->indexWerteArray [$arr]->adjClose;
 		}
+		$result = ($sum / $this->buySMA);
 		return $result;
 	}
 	private function berechneDurchbrueche() {

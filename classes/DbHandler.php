@@ -62,7 +62,7 @@ class DbHandler {
 				throw new PDOException ( 'NO DATA FOUND' );
 			}
 		} catch ( PDOException $e ) {
-			$message = (DEBUG == true) ? $e->getMessage () : "Keine Indexe gefunden";
+			$message = (DEBUG == true) ? $e->getMessage () : "Index nicht gefunden";
 			$this->app->render ( 404, array (
 					"message" => $message,
 					"error" => true 
@@ -81,7 +81,7 @@ class DbHandler {
 				throw new PDOException ( 'NO DATA FOUND' );
 			}
 		} catch ( PDOException $e ) {
-			$message = (DEBUG == true) ? $e->getMessage () : "Keine Indexe gefunden";
+			$message = (DEBUG == true) ? $e->getMessage () : "Keine Indexwerte in diesem Zeitraum gefunden";
 			$this->app->render ( 404, array (
 					"message" => $message,
 					"error" => true 
