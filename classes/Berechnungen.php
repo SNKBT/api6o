@@ -1,6 +1,5 @@
 <?php
 /**
- * An example resource
  * @SWG\Resource(
  *  apiVersion="0.1",
  *  basePath="http://api.localhost",

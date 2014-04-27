@@ -15,7 +15,7 @@ $app->view ( new \JsonAPI () );
 
 $test = new Test ();
 $dbh = new DbHandler ( $app );
-$yahooDaten = new YahooDaten ( $dbh );
+$yahooDaten = new YahooDaten ( $dbh, $app );
 $berechnungen = new Berechnungen ( $dbh, $app );
 
 // ------------- GET route -------------
@@ -28,27 +28,27 @@ $app->get ( '/hello/:name', function ($name) use($app, $test) {
 $app->get ( '/dbTest', function () use($app, $dbh) {
 	$app->render ( 200, $dbh->dbTest () );
 } );
-$app->get ( '/leseIndexe', function () use($berechnungen) {
-	$berechnungen->leseIndexe ();
+$app->get ( '/leseIndexe', function () use($dbh) {
+	$dbh->leseIndexe ();
+} );
+$app->get ( '/leseDatenstand', function () use($yahooDaten) {
+	$yahooDaten->leseDatenstand ();
+} );
+$app->get ( '/db/update', function () use($app, $yahooDaten) {
+	$yahooDaten->aktualisiereIndexe ( "delta" );
 } );
 
 // ------------- POST route -------------
 $app->post ( '/berechneRendite', function () use($berechnungen) {
 	$berechnungen->berechneRendite ();
 } );
-$app->post ( '/db/add', function () use($app, $yahooDaten) {
-	$yahooDaten->aktualisiereIndexe ("full");
-} );
-$app->get ( '/db/update', function () use($app, $yahooDaten) {
-	$yahooDaten->aktualisiereIndexe ("delta");
-} );
 $app->post ( '/testPost', function () use($app, $test) {
 	$test->testPost ();
 } );
 
 // ------------- PUT route -------------
-$app->put ( '/put', function () {
-	echo 'This is a PUT route';
+$app->put ( '/aktualisiereDatenstandManuell', function () use($app, $yahooDaten) {
+	$yahooDaten->aktualisiereDatenstandManuell();
 } );
 
 // ------------- PATCH route -------------

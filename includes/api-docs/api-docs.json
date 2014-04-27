@@ -9,6 +9,10 @@
         {
             "path": "/test.json",
             "description": "An example resource"
+        },
+        {
+            "path": "/yahooDaten.json",
+            "description": "API Datenbasis aus Yahoo Finance Daten"
         }
     ]
 }

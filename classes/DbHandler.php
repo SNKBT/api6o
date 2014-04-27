@@ -18,6 +18,25 @@ class DbHandler {
 			return NULL;
 		}
 	}
+	public function leseIndexe() {
+		try {
+			$query = $this->conn->prepare ( "SELECT * FROM indexe ORDER BY id ASC" );
+			if ($query->execute () && $query->rowCount () > 0) {
+				$result = array ();
+				$result = $query->fetchAll ( PDO::FETCH_OBJ );
+				return $result;
+			} else {
+				throw new PDOException ( 'NO DATA FOUND' );
+			}
+		} catch ( PDOException $e ) {
+			$message = (DEBUG == true) ? $e->getMessage () : "Keine Indexe gefunden";
+			$this->app->render ( 404, array (
+					"message" => $message,
+					"error" => true
+			) );
+			$this->app->stop ();
+		}
+	}
 	public function schreibeLog($nachricht, $typ, $httpCode) {
 		if (empty ( $nachricht ) || ! is_numeric ( $typ ) || ! is_numeric ( $httpCode )) {
 			echo '{"error":{"text":"Log kann nicht geschrieben werden!"}}';
@@ -34,21 +53,21 @@ class DbHandler {
 			exit ();
 		}
 	}
-	public function leseIndexe() {
+	public function leseDatenstand() {
 		try {
-			$query = $this->conn->prepare ( "SELECT * FROM indexe ORDER BY id ASC" );
+			$query = $this->conn->prepare ( "SELECT nachricht, zeitstempel, httpCode FROM log WHERE typ=1 ORDER BY id DESC LIMIT 1" );
 			if ($query->execute () && $query->rowCount () > 0) {
 				$result = array ();
-				$result = $query->fetchAll ( PDO::FETCH_OBJ );
-				return $result;
+				$result ['leseDatenstand'] = $query->fetchAll ( PDO::FETCH_OBJ );
+				$this->app->render ( $result ['leseDatenstand'][0]->httpCode, $result );
 			} else {
 				throw new PDOException ( 'NO DATA FOUND' );
 			}
 		} catch ( PDOException $e ) {
-			$message = (DEBUG == true) ? $e->getMessage () : "Keine Indexe gefunden";
+			$message = (DEBUG == true) ? $e->getMessage () : "Keine Infos ueber den Datenstand vorhanden";
 			$this->app->render ( 404, array (
 					"message" => $message,
-					"error" => true 
+					"error" => true
 			) );
 			$this->app->stop ();
 		}
@@ -115,7 +134,6 @@ class DbHandler {
 		}
 		return $letztesDatum;
 	}
-	
 	private function schreibeIndexe($data_array, $id, $type) {
 		if (empty ( $data_array ) || ! is_numeric ( $id )) {
 			echo '{"error":{"text":"Array ist leer!"}}';

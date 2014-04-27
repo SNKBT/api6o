@@ -1,0 +1,67 @@
+{
+    "basePath": "http://api.localhost",
+    "swaggerVersion": "1.2",
+    "apiVersion": "0.1",
+    "resourcePath": "/yahooDaten",
+    "apis": [
+        {
+            "path": "/aktualisiereDatenstandManuell",
+            "operations": [
+                {
+                    "method": "PUT",
+                    "summary": "Aktuallisiert den Datenstand manuell.",
+                    "nickname": "aktualisiereDatenstandManuell",
+                    "type": "Index",
+                    "responseMessages": [
+                        {
+                            "code": 404,
+                            "message": "Keine Indexe wurden aktualisiert!"
+                        },
+                        {
+                            "code": 404,
+                            "message": "Aktualisierung fehlgeschlagen"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "path": "/leseDatenstand",
+            "operations": [
+                {
+                    "method": "GET",
+                    "summary": "Gibt den letzten Log Eintrag zum aktuellen Datenstand zurueck.",
+                    "nickname": "leseDatenstand",
+                    "type": "Index",
+                    "responseMessages": [
+                        {
+                            "code": 404,
+                            "message": "Keine Infos ueber den Datenstand vorhanden"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "models": {
+        "Index": {
+            "id": "Index",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "boolean"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "error",
+                "message",
+                "status"
+            ]
+        }
+    }
+}

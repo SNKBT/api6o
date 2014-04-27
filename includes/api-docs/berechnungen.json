@@ -114,11 +114,8 @@
         "Index": {
             "id": "Index",
             "properties": {
-                "leseIndexe": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "leseIndexe"
-                    }
+                "message": {
+                    "type": "string"
                 },
                 "error": {
                     "type": "boolean"
@@ -129,28 +126,8 @@
             },
             "required": [
                 "error",
-                "leseIndexe",
+                "message",
                 "status"
-            ]
-        },
-        "leseIndexe": {
-            "id": "leseIndexe",
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "format": "date"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "kuerzel": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id",
-                "kuerzel",
-                "name"
             ]
         },
         "berechneRendite": {
