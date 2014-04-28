@@ -28,8 +28,8 @@ $app->get ( '/hello/:name', function ($name) use($app, $test) {
 $app->get ( '/dbTest', function () use($app, $dbh) {
 	$app->render ( 200, $dbh->dbTest () );
 } );
-$app->get ( '/leseIndexe', function () use($dbh) {
-	$dbh->leseIndexe ();
+$app->get ( '/leseIndexe', function () use($berechnungen) {
+	$berechnungen->leseIndexe ();
 } );
 $app->get ( '/leseDatenstand', function () use($yahooDaten) {
 	$yahooDaten->leseDatenstand ();
