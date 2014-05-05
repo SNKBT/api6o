@@ -19,6 +19,7 @@ class Berechnungen {
 	private $rente_auszahlung = 0;
 	private $total_rente_auszahlung = 0;
 	private $totalAnteile = 0;
+	private $totalBargeld = 0;
 	private $gesamtrenditeIndex = 0;
 	private $gesamtrenditeKapital = 0;
 	private $veraenderungStartkapitalProzent = 0;
@@ -26,6 +27,7 @@ class Berechnungen {
 	private $totalRenteeinzahlungen = 0;
 	private $buySMA = 0;
 	private $sellSMA = 0;
+	private $buyModus = true;
 	function __construct($dbh, $app) {
 		$this->dbh = $dbh;
 		$this->app = $app;
@@ -196,6 +198,7 @@ class Berechnungen {
 				"veraenderungStartkapital" => $this->berechneVeraenderungStartkapital (),
 				"veraenderungStartkapitalGeld" => $this->berechneVeraenderungStartkapitalGeld (),
 				"totalRenteeinzahlungen" => $this->totalRenteeinzahlungen,
+				"totalBargeld" => $this->totalBargeld,
 				"indexID" => $this->indexID,
 				"indexWerte" => $this->indexWerteArray 
 		) );
@@ -294,13 +297,17 @@ class Berechnungen {
 		
 		for($i = count ( $this->indexWerteArray ) - 1; $i >= 0; $i --) {
 			
-			if ((date ( 'N', strtotime ( $this->indexWerteArray [$i]->tradeDate ) ) == 1) && ($this->startkurs == 0) && ($this->startkapital > 0)) {
-				$this->startkurs = $this->indexWerteArray [$i]->adjClose;
-				$this->zahleEin ( $i, $startKap );
-				$this->startkapital = ($this->startkapital - $startKap);
-			} elseif ((date ( 'N', strtotime ( $this->indexWerteArray [$i]->tradeDate ) ) == 1) && ($this->indexWerteArray [$i]->adjClose >= $this->startkurs) && ($this->startkapital > 0)) {
-				$this->zahleEin ( $i, $startKap );
-				$this->startkapital = ($this->startkapital - $startKap);
+			if ($this->buyModus == true) {
+				if ((date ( 'N', strtotime ( $this->indexWerteArray [$i]->tradeDate ) ) == 1) && ($this->startkurs == 0) && ($this->startkapital > 0)) {
+					$this->startkurs = $this->indexWerteArray [$i]->adjClose;
+					$this->zahleEin ( $i, $startKap );
+					$this->startkapital = ($this->startkapital - $startKap);
+				} elseif ((date ( 'N', strtotime ( $this->indexWerteArray [$i]->tradeDate ) ) == 1) && ($this->indexWerteArray [$i]->adjClose >= $this->startkurs) && ($this->startkapital > 0)) {
+					$this->zahleEin ( $i, $startKap );
+					$this->startkapital = ($this->startkapital - $startKap);
+				}
+			}elseif($this->buyModus == false){
+				$this->verkaufeAlleAnteile ( $i );
 			}
 			
 			$tag = substr ( $this->indexWerteArray [$i]->tradeDate, - 2 );
@@ -323,16 +330,18 @@ class Berechnungen {
 				$this->lastAdjClose = $this->indexWerteArray [$i]->adjClose;
 			}
 			if ($this->buySMA != null)
-				$this->indexWerteArray [$i]->buySMA = $this->berechneSMA ( $i );
+				$this->indexWerteArray [$i]->buySMA = $this->berechneSMA ( $i, "buy" );
 			if ($this->sellSMA != null)
-				$this->indexWerteArray [$i]->sellSMA = $this->berechneSMA ( $i );
+				$this->indexWerteArray [$i]->sellSMA = $this->berechneSMA ( $i, "sell" );
+			
+			$this->berechneSignale($i);
 		}
 	}
 	private function zahleAus($i) {
 		if ((($this->totalAnteile * $this->indexWerteArray [$i]->adjClose) + $this->rente_auszahlung) > 0) {
 			$this->indexWerteArray [$i]->desinvestition = $this->rente_auszahlung;
-			$investition = round ( ($this->rente_auszahlung / $this->indexWerteArray [$i]->adjClose), 4 );
-			$this->totalAnteile = ($this->totalAnteile + $investition);
+			$deinvestition = round ( ($this->rente_auszahlung / $this->indexWerteArray [$i]->adjClose), 4 );
+			$this->totalAnteile = ($this->totalAnteile + $deinvestition);
 		}
 		$this->berechneAnteilUndWert ( $i );
 	}
@@ -345,9 +354,16 @@ class Berechnungen {
 			$this->berechneAnteilUndWert ( $i );
 		}
 	}
+	private function verkaufeAlleAnteile($i) {
+		echo "Verkaufe " . $this->totalAnteile . "Anteile zu einem Kurs von ". $this->indexWerteArray [$i]->adjClose . " ergibt ein Barbetrag von ";
+		echo ($this->totalAnteile * $this->indexWerteArray [$i]->adjClose);
+		exit;
+	}
 	private function berechneAnteilUndWert($i) {
 		$this->indexWerteArray [$i]->anteile = $this->totalAnteile;
+		$this->indexWerteArray [$i]->bargeld = $this->totalBargeld;
 		$this->indexWerteArray [$i]->wert = round ( $this->totalAnteile * $this->indexWerteArray [$i]->adjClose, 4 );
+		$this->indexWerteArray [$i]->vermoegen = ($this->indexWerteArray [$i]->bargeld + $this->indexWerteArray [$i]->wert);
 	}
 	private function berechneGesamtrenditeIndex() {
 		$return = ($this->firstAdjClose > 0) ? round ( (($this->lastAdjClose / $this->firstAdjClose) * 100), 2 ) : null;
@@ -365,17 +381,37 @@ class Berechnungen {
 		$return = ($this->totalStartkapital > 0) ? round ( (($this->totalAnteile * $this->lastAdjClose) - $this->totalStartkapital), 2 ) : null;
 		return $return;
 	}
-	private function berechneSMA($i) {
+	private function berechneSMA($i, $type) {
 		$result = 0;
 		$sum = 0;
-		for($n = 0; $n < $this->buySMA; $n ++) {
-			$arr = ($i < (count ( $this->indexWerteArray ) - 1)) ? ($i + $n) : $i;
-			$sum += $this->indexWerteArray [$arr]->adjClose;
+		$count = 0;
+		$typeArray = ($type == "buy") ? $this->buySMA : $this->sellSMA;
+		for($n = 0; $n < $typeArray; $n ++) {
+			if ((count ( $this->indexWerteArray ) - 1 - $i - $n) >= 0) {
+				$arr = ($i + $n);
+				$count ++;
+				$sum += $this->indexWerteArray [$arr]->adjClose;
+			}
 		}
-		$result = ($sum / $this->buySMA);
+		$result = ($sum / $count);
 		return $result;
 	}
-	private function berechneDurchbrueche() {
+	private function berechneSignale($i) {
+		$close = $this->indexWerteArray [$i]->adjClose;
+		//$closeVortag = ($i < (count($this->indexWerteArray)-1)) ? $this->indexWerteArray [$i-1]->adjClose : $close;
+		$closeVortag = ($i > 0) ? $this->indexWerteArray [$i-1]->adjClose : $close;
+		$buy = $this->indexWerteArray [$i]->buySMA;
+		$sell = $this->indexWerteArray [$i]->sellSMA;
+		
+		if($this->totalAnteile > 0 && $closeVortag > $sell && $close < $sell && $sell < $buy) {
+			$this->indexWerteArray[$i]->signal = "sell";
+			$desinvestition = round(($this->totalAnteile * $this->indexWerteArray [$i]->adjClose),4);
+			$this->indexWerteArray [$i]->desinvestition = $desinvestition;
+			$this->totalBargeld = $desinvestition;
+			$this->totalAnteile = 0;
+				
+		}
+		
 	}
 }
 
