@@ -68,8 +68,8 @@ class YahooDaten {
 			$andereIndexe = "";
 			try {
 				$this->indexe = $this->dbh->leseIndexe ();
-				
-				for($i = 0; $i < count ( $this->indexe ); $i ++) {
+				$total = count ( $this->indexe );
+				for($i = 0; $i < $total; $i ++) {
 					if ($this->indexe [$i]->kuerzel == "")
 						continue;
 					$lastdate = $this->dbh->leseLetztesDatum ( $this->indexe [$i]->id );

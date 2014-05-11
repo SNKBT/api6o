@@ -281,7 +281,8 @@ class Berechnungen {
 	private function berechneStartkapital() {
 		$zahlungen = ($this->startkapital / 4);
 		
-		for($i = count ( $this->indexWerteArray ) - 1; $i >= 0; $i --) {
+		$total = count ( $this->indexWerteArray ) - 1;
+		for($i = $total; $i >= 0; $i --) {
 			if ($this->startkapital <= 0) {
 				break;
 			}
@@ -297,8 +298,8 @@ class Berechnungen {
 	}
 	private function berechneZahlungen($zahlung) {
 		$this->startkaptalViertel = ($this->startkapital / 4);
-		
-		for($i = count ( $this->indexWerteArray ) - 1; $i >= 0; $i --) {
+		$total = count ( $this->indexWerteArray ) - 1;
+		for($i = $total; $i >= 0; $i --) {
 			
 			if ($this->buySMA != null)
 				$this->indexWerteArray [$i]->buySMA = $this->berechneSMA ( $i, "buy" );
