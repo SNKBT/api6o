@@ -13,6 +13,7 @@ class Berechnungen {
 	private $indexWerteArray = array ();
 	private $startkapital = 0;
 	private $totalStartkapital = 0;
+	private $startkaptalViertel = 0;
 	private $startkurs = 0;
 	private $fistAdjClose = 0;
 	private $lastAdjClose = 0;
@@ -25,6 +26,7 @@ class Berechnungen {
 	private $veraenderungStartkapitalProzent = 0;
 	private $veraenderungStartkapital = 0;
 	private $totalRenteeinzahlungen = 0;
+	private $totalVermoegenEnde = 0;
 	private $buySMA = 0;
 	private $sellSMA = 0;
 	private $buyModus = true;
@@ -199,6 +201,7 @@ class Berechnungen {
 				"veraenderungStartkapitalGeld" => $this->berechneVeraenderungStartkapitalGeld (),
 				"totalRenteeinzahlungen" => $this->totalRenteeinzahlungen,
 				"totalBargeld" => $this->totalBargeld,
+				"totalVermoegen" => $this->totalVermoegenEnde,
 				"indexID" => $this->indexID,
 				"indexWerte" => $this->indexWerteArray 
 		) );
@@ -293,22 +296,37 @@ class Berechnungen {
 		}
 	}
 	private function berechneZahlungen($zahlung) {
-		$startKap = ($this->startkapital / 4);
+		$this->startkaptalViertel = ($this->startkapital / 4);
 		
 		for($i = count ( $this->indexWerteArray ) - 1; $i >= 0; $i --) {
 			
+			if ($this->buySMA != null)
+				$this->indexWerteArray [$i]->buySMA = $this->berechneSMA ( $i, "buy" );
+			if ($this->sellSMA != null)
+				$this->indexWerteArray [$i]->sellSMA = $this->berechneSMA ( $i, "sell" );
+			
+			$this->berechneSignale ( $i );
+			
+			// JUST FOR DEBUG $this->indexWerteArray [$i]->buyModus = $this->buyModus;
+			
+			// Wenn buyModus aktiv ist, wird das Startkapital resp. neu investierte Kapital einbezahlt
 			if ($this->buyModus == true) {
 				if ((date ( 'N', strtotime ( $this->indexWerteArray [$i]->tradeDate ) ) == 1) && ($this->startkurs == 0) && ($this->startkapital > 0)) {
 					$this->startkurs = $this->indexWerteArray [$i]->adjClose;
-					$this->zahleEin ( $i, $startKap );
-					$this->startkapital = ($this->startkapital - $startKap);
+					$this->zahleEin ( $i, $this->startkaptalViertel );
+					$this->startkapital = ($this->startkapital - $this->startkaptalViertel);
 				} elseif ((date ( 'N', strtotime ( $this->indexWerteArray [$i]->tradeDate ) ) == 1) && ($this->indexWerteArray [$i]->adjClose >= $this->startkurs) && ($this->startkapital > 0)) {
-					$this->zahleEin ( $i, $startKap );
-					$this->startkapital = ($this->startkapital - $startKap);
+					$this->zahleEin ( $i, $this->startkaptalViertel );
+					$this->startkapital = ($this->startkapital - $this->startkaptalViertel);
+					if ($this->startkapital < 0)
+						$this->startkapital = 0;
 				}
-			}elseif($this->buyModus == false){
-				$this->verkaufeAlleAnteile ( $i );
 			}
+			/**
+			 * elseif($this->buyModus == false){
+			 * $this->verkaufeAlleAnteile ( $i );
+			 * }
+			 */
 			
 			$tag = substr ( $this->indexWerteArray [$i]->tradeDate, - 2 );
 			$monat = substr ( $this->indexWerteArray [$i]->tradeDate, 5, 2 );
@@ -318,23 +336,20 @@ class Berechnungen {
 				if ($zahlung == "auszahlung") {
 					$this->zahleAus ( $i );
 				} elseif ($zahlung == "einzahlung") {
-					$this->zahleEin ( $i, $this->rente_auszahlung );
+					$this->zahleEin ( $i, $this->rente_auszahlung, true );
 				}
 			} else {
 				$this->berechneAnteilUndWert ( $i );
 			}
+			// JUST FOR DEBUG $this->indexWerteArray [$i]->startkapital = $this->startkapital;
+			
 			if ($i == (count ( $this->indexWerteArray ) - 1)) {
 				$this->firstAdjClose = $this->indexWerteArray [$i]->adjClose;
 			}
 			if ($i == 0) {
 				$this->lastAdjClose = $this->indexWerteArray [$i]->adjClose;
+				$this->totalVermoegenEnde = (round ( ($this->totalAnteile * $this->lastAdjClose), 2 ) + $this->totalBargeld);
 			}
-			if ($this->buySMA != null)
-				$this->indexWerteArray [$i]->buySMA = $this->berechneSMA ( $i, "buy" );
-			if ($this->sellSMA != null)
-				$this->indexWerteArray [$i]->sellSMA = $this->berechneSMA ( $i, "sell" );
-			
-			$this->berechneSignale($i);
 		}
 	}
 	private function zahleAus($i) {
@@ -345,22 +360,28 @@ class Berechnungen {
 		}
 		$this->berechneAnteilUndWert ( $i );
 	}
-	private function zahleEin($i, $kapital) {
+	private function zahleEin($i, $kapital, $rente=false) {
 		if ($kapital >= 0) {
 			$this->indexWerteArray [$i]->investition = $kapital;
-			$this->totalRenteeinzahlungen += $kapital;
+			$this->totalRenteeinzahlungen += ($rente == true) ? $kapital : 0;
 			$investition = round ( ($kapital / $this->indexWerteArray [$i]->adjClose), 4 );
 			$this->totalAnteile = ($this->totalAnteile + $investition);
 			$this->berechneAnteilUndWert ( $i );
 		}
 	}
-	private function verkaufeAlleAnteile($i) {
-		echo "Verkaufe " . $this->totalAnteile . "Anteile zu einem Kurs von ". $this->indexWerteArray [$i]->adjClose . " ergibt ein Barbetrag von ";
-		echo ($this->totalAnteile * $this->indexWerteArray [$i]->adjClose);
-		exit;
-	}
+	/**
+	 * private function verkaufeAlleAnteile($i) {
+	 * echo "Verkaufe " .
+	 *
+	 *
+	 *
+	 * $this->totalAnteile . "Anteile zu einem Kurs von ". $this->indexWerteArray [$i]->adjClose . " ergibt ein Barbetrag von ";
+	 * echo ($this->totalAnteile * $this->indexWerteArray [$i]->adjClose);
+	 * exit;
+	 * }
+	 */
 	private function berechneAnteilUndWert($i) {
-		$this->indexWerteArray [$i]->anteile = $this->totalAnteile;
+		$this->indexWerteArray [$i]->anteile = ($this->totalAnteile > 0) ? $this->totalAnteile : 0;
 		$this->indexWerteArray [$i]->bargeld = $this->totalBargeld;
 		$this->indexWerteArray [$i]->wert = round ( $this->totalAnteile * $this->indexWerteArray [$i]->adjClose, 4 );
 		$this->indexWerteArray [$i]->vermoegen = ($this->indexWerteArray [$i]->bargeld + $this->indexWerteArray [$i]->wert);
@@ -370,15 +391,15 @@ class Berechnungen {
 		return $return;
 	}
 	private function berechneGesamtrenditeKapital() {
-		$return = ($this->firstAdjClose > 0) ? round ( ((($this->totalAnteile * $this->lastAdjClose) / ($this->totalRenteeinzahlungen + $this->totalStartkapital)) * 100), 2 ) : null;
+		$return = ($this->firstAdjClose > 0) ? round ( ((($this->totalVermoegenEnde) / ($this->totalRenteeinzahlungen + $this->totalStartkapital)) * 100), 2 ) : null;
 		return $return;
 	}
 	private function berechneVeraenderungStartkapital() {
-		$return = ($this->totalStartkapital > 0) ? round ( ((($this->totalAnteile * $this->lastAdjClose) / $this->totalStartkapital) * 100), 2 ) : null;
+		$return = ($this->totalStartkapital > 0) ? round ( ((($this->totalVermoegenEnde) / $this->totalStartkapital) * 100), 2 ) : null;
 		return $return;
 	}
 	private function berechneVeraenderungStartkapitalGeld() {
-		$return = ($this->totalStartkapital > 0) ? round ( (($this->totalAnteile * $this->lastAdjClose) - $this->totalStartkapital), 2 ) : null;
+		$return = ($this->totalStartkapital > 0) ? round ( ($this->totalVermoegenEnde - $this->totalStartkapital), 2 ) : null;
 		return $return;
 	}
 	private function berechneSMA($i, $type) {
@@ -398,20 +419,27 @@ class Berechnungen {
 	}
 	private function berechneSignale($i) {
 		$close = $this->indexWerteArray [$i]->adjClose;
-		//$closeVortag = ($i < (count($this->indexWerteArray)-1)) ? $this->indexWerteArray [$i-1]->adjClose : $close;
-		$closeVortag = ($i > 0) ? $this->indexWerteArray [$i-1]->adjClose : $close;
+		// $closeVortag = ($i < (count($this->indexWerteArray)-1)) ? $this->indexWerteArray [$i-1]->adjClose : $close;
+		$closeVortag = ($i > 0) ? $this->indexWerteArray [$i - 1]->adjClose : $close;
 		$buy = $this->indexWerteArray [$i]->buySMA;
 		$sell = $this->indexWerteArray [$i]->sellSMA;
 		
-		if($this->totalAnteile > 0 && $closeVortag > $sell && $close < $sell && $sell < $buy) {
-			$this->indexWerteArray[$i]->signal = "sell";
-			$desinvestition = round(($this->totalAnteile * $this->indexWerteArray [$i]->adjClose),4);
+		if ($this->buyModus == true && $this->totalAnteile > 0 && $closeVortag > $sell && $close < $sell && $sell < $buy) {
+			$this->indexWerteArray [$i]->signal = "sell";
+			$desinvestition = round ( ($this->totalAnteile * $this->indexWerteArray [$i]->adjClose), 4 );
 			$this->indexWerteArray [$i]->desinvestition = $desinvestition;
-			$this->totalBargeld = $desinvestition;
+			$this->totalBargeld = ($this->totalBargeld + $desinvestition);
 			$this->totalAnteile = 0;
-				
+			$this->buyModus = false;
+		} elseif ($this->buyModus == false && $this->totalAnteile == 0 && $closeVortag > $buy && $close >= $buy && $sell < $buy) {
+			$this->indexWerteArray [$i]->signal = "buy";
+			// $investition = $this->totalBargeld;
+			// $this->indexWerteArray [$i]->investition = $investition;
+			$this->startkapital = $this->totalBargeld;
+			$this->startkaptalViertel = ($this->totalBargeld / 4);
+			$this->startkurs = 0;
+			$this->buyModus = true;
 		}
-		
 	}
 }
 
