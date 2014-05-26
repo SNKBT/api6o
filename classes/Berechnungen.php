@@ -1,7 +1,7 @@
 <?php
 /**
  * @SWG\Resource(
- *  apiVersion="0.1",
+ *  apiVersion="1.0",
  *  basePath="http://api.localhost",
  *  description="API Berechnungen"
  * )
@@ -147,14 +147,10 @@ class Berechnungen {
 	 * @SWG\Property(name="sellSMA",type="double")
 	 */
 	public function berechneRendite() {
+		
 		if ($_SERVER ['REQUEST_METHOD'] != 'POST') {
 			die ();
 		}
-		
-		// $this->app->contentType ( 'application/json' );
-		// $request = $this->app->request ()->getBody ();
-		// $wine = json_decode($request);
-		// $return = json_decode ( $request );
 		
 		$missingPost = "";
 		$missingPost .= (! isset ( $_POST ['startDatum'] )) ? "startDatum, " : "";
@@ -203,7 +199,7 @@ class Berechnungen {
 				"totalBargeld" => $this->totalBargeld,
 				"totalVermoegen" => $this->totalVermoegenEnde,
 				"indexID" => $this->indexID,
-				"indexWerte" => $this->indexWerteArray 
+				"indexWerte" => $this->indexWerteArray
 		) );
 		// ---- ENDE AUSGABE ----
 	}
@@ -231,8 +227,7 @@ class Berechnungen {
 		}
 	}
 	private function ueberpruefeIndex($indexID) {
-		$result = $this->dbh->pruefeIndex ( $indexID );
-		return $result;
+		return $this->dbh->pruefeIndex ( $indexID );
 	}
 	private function ueberpruefeKapital($kapital, $test = "") {
 		try {
@@ -275,8 +270,7 @@ class Berechnungen {
 		}
 	}
 	public function leseIndexWerte($indexID, $startDatum, $endDatum) {
-		$result = $this->dbh->leseIndexWerte ( $indexID, date ( "Y-m-d", strtotime ( $startDatum ) ), date ( "Y-m-d", strtotime ( $endDatum ) ) );
-		return $result;
+		return $this->dbh->leseIndexWerte ( $indexID, date ( "Y-m-d", strtotime ( $startDatum ) ), date ( "Y-m-d", strtotime ( $endDatum ) ) );
 	}
 	private function berechneStartkapital() {
 		$zahlungen = ($this->startkapital / 4);
@@ -297,9 +291,12 @@ class Berechnungen {
 		}
 	}
 	private function berechneZahlungen($zahlung) {
+		
 		$this->startkaptalViertel = ($this->startkapital / 4);
 		$total = count ( $this->indexWerteArray ) - 1;
 		for($i = $total; $i >= 0; $i --) {
+			
+			$this->indexWerteArray [$i]->forID = $i;
 			
 			if ($this->buySMA != null)
 				$this->indexWerteArray [$i]->buySMA = $this->berechneSMA ( $i, "buy" );
@@ -322,13 +319,7 @@ class Berechnungen {
 					if ($this->startkapital < 0)
 						$this->startkapital = 0;
 				}
-			}
-			/**
-			 * elseif($this->buyModus == false){
-			 * $this->verkaufeAlleAnteile ( $i );
-			 * }
-			 */
-			
+			}			
 			$tag = substr ( $this->indexWerteArray [$i]->tradeDate, - 2 );
 			$monat = substr ( $this->indexWerteArray [$i]->tradeDate, 5, 2 );
 			$letzterMonat = ($i < (count ( $this->indexWerteArray ) - 1)) ? substr ( $this->indexWerteArray [$i + 1]->tradeDate, 5, 2 ) : $monat;
@@ -370,17 +361,6 @@ class Berechnungen {
 			$this->berechneAnteilUndWert ( $i );
 		}
 	}
-	/**
-	 * private function verkaufeAlleAnteile($i) {
-	 * echo "Verkaufe " .
-	 *
-	 *
-	 *
-	 * $this->totalAnteile . "Anteile zu einem Kurs von ". $this->indexWerteArray [$i]->adjClose . " ergibt ein Barbetrag von ";
-	 * echo ($this->totalAnteile * $this->indexWerteArray [$i]->adjClose);
-	 * exit;
-	 * }
-	 */
 	private function berechneAnteilUndWert($i) {
 		$this->indexWerteArray [$i]->anteile = ($this->totalAnteile > 0) ? $this->totalAnteile : 0;
 		$this->indexWerteArray [$i]->bargeld = $this->totalBargeld;
