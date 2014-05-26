@@ -32,7 +32,7 @@ class DbHandler {
 			$message = (DEBUG == true) ? $e->getMessage () : "Keine Indexe gefunden";
 			$this->app->render ( 404, array (
 					"message" => $message,
-					"error" => true
+					"error" => true 
 			) );
 			$this->app->stop ();
 		}
@@ -59,7 +59,7 @@ class DbHandler {
 			if ($query->execute () && $query->rowCount () > 0) {
 				$result = array ();
 				$result ['leseDatenstand'] = $query->fetchAll ( PDO::FETCH_OBJ );
-				$this->app->render ( $result ['leseDatenstand'][0]->httpCode, $result );
+				$this->app->render ( $result ['leseDatenstand'] [0]->httpCode, $result );
 			} else {
 				throw new PDOException ( 'NO DATA FOUND' );
 			}
@@ -67,7 +67,7 @@ class DbHandler {
 			$message = (DEBUG == true) ? $e->getMessage () : "Keine Infos ueber den Datenstand vorhanden";
 			$this->app->render ( 404, array (
 					"message" => $message,
-					"error" => true
+					"error" => true 
 			) );
 			$this->app->stop ();
 		}
@@ -91,7 +91,7 @@ class DbHandler {
 	}
 	public function leseIndexWerte($indexID, $startDatum, $endDatum) {
 		try {
-			$query = $this->conn->prepare ( "SELECT tradeDate, adjClose FROM indexe_values WHERE fk_indexe_id=" . $indexID . " AND tradeDate >='" . $startDatum . "' AND tradeDate<='" . $endDatum . "'" );
+			$query = $this->conn->prepare ( "SELECT tradeDate, adjClose FROM indexe_values WHERE fk_indexe_id=" . $indexID . " AND tradeDate >='" . $startDatum . "' AND tradeDate<='" . $endDatum . "'  ORDER BY tradeDate DESC" );
 			if ($query->execute () && $query->rowCount () > 0) {
 				$result = array ();
 				$result = $query->fetchAll ( PDO::FETCH_OBJ );
@@ -156,7 +156,7 @@ class DbHandler {
 			$this->conn->rollBack ();
 			$this->app->render ( 404, array (
 					"message" => $message,
-					"error" => true
+					"error" => true 
 			) );
 			$this->app->stop ();
 		}

@@ -1,15 +1,10 @@
 <?php
 /**
- * An example resource
  * @SWG\Resource(
- *  apiVersion="0.1",
- *  basePath="http://api.localhost"
+ *  apiVersion="1.0",
+ *  basePath="http://api.localhost",
+ *  description="Testklasse, welche für JSON-Funktionstests verwendet werden kann."
  * )
- *
- * Auto-generated:
- * Uses swaggerVersion="1.2" by default.
- * classname "ResolveController" should resolve to resourcePath "/resolve".
- * 
  */
 class Test {
 	/**
@@ -28,9 +23,6 @@ class Test {
 	 * )
 	 * )
 	 * )
-	 *
-	 * Auto-generated:
-	 * nickname resolves to the method name "get_dogs"
 	 */
 	function helloName($name) {
 		$data_array = array ();

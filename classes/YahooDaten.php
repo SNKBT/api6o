@@ -1,7 +1,7 @@
 <?php
 /**
  * @SWG\Resource(
- *  apiVersion="0.1",
+ *  apiVersion="1.0",
  *  basePath="http://api.localhost",
  *  description="API Datenbasis aus Yahoo Finance Daten"
  * )
