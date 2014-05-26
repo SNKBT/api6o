@@ -2,8 +2,7 @@
 /**
  * @SWG\Resource(
  *  apiVersion="1.0",
- *  basePath="http://api.localhost",
- *  description="Testklasse, welche für JSON-Funktionstests verwendet werden kann."
+ *  description="Testklasse fuer JSON-Funktionstests"
  * )
  */
 class Test {

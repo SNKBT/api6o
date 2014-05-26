@@ -2,7 +2,6 @@
 /**
  * @SWG\Resource(
  *  apiVersion="1.0",
- *  basePath="http://api.localhost",
  *  description="API Berechnungen"
  * )
  */
@@ -295,8 +294,6 @@ class Berechnungen {
 		$this->startkaptalViertel = ($this->startkapital / 4);
 		$total = count ( $this->indexWerteArray ) - 1;
 		for($i = $total; $i >= 0; $i --) {
-			
-			$this->indexWerteArray [$i]->forID = $i;
 			
 			if ($this->buySMA != null)
 				$this->indexWerteArray [$i]->buySMA = $this->berechneSMA ( $i, "buy" );
