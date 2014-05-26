@@ -173,6 +173,7 @@ class Berechnungen {
 		
 		$this->rente_auszahlung = $this->ueberpruefeKapital ( $_POST ['rente_auszahlung'], "rente_auszahlung" );
 		$this->totalStartkapital = $this->startkapital;
+		$this->totalBargeld = $this->startkapital;
 		
 		$this->buySMA = (isset ( $_POST ['buySMA'] )) ? $this->ueberpruefeSMA ( $_POST ['buySMA'] ) : null;
 		$this->sellSMA = (isset ( $_POST ['sellSMA'] )) ? $this->ueberpruefeSMA ( $_POST ['sellSMA'] ) : null;
@@ -310,9 +311,11 @@ class Berechnungen {
 					$this->startkurs = $this->indexWerteArray [$i]->adjClose;
 					$this->zahleEin ( $i, $this->startkaptalViertel );
 					$this->startkapital = ($this->startkapital - $this->startkaptalViertel);
+					$this->totalBargeld = ($this->totalBargeld - $this->startkaptalViertel);
 				} elseif ((date ( 'N', strtotime ( $this->indexWerteArray [$i]->tradeDate ) ) == 1) && ($this->indexWerteArray [$i]->adjClose >= $this->startkurs) && ($this->startkapital > 0)) {
 					$this->zahleEin ( $i, $this->startkaptalViertel );
 					$this->startkapital = ($this->startkapital - $this->startkaptalViertel);
+					$this->totalBargeld = ($this->totalBargeld - $this->startkaptalViertel);
 					if ($this->startkapital < 0)
 						$this->startkapital = 0;
 				}
@@ -360,20 +363,20 @@ class Berechnungen {
 	}
 	private function berechneAnteilUndWert($i) {
 		$this->indexWerteArray [$i]->anteile = ($this->totalAnteile > 0) ? $this->totalAnteile : 0;
-		$this->indexWerteArray [$i]->bargeld = $this->totalBargeld;
+		$this->indexWerteArray [$i]->bargeld = ($this->totalBargeld);
 		$this->indexWerteArray [$i]->wert = round ( $this->totalAnteile * $this->indexWerteArray [$i]->adjClose, 4 );
 		$this->indexWerteArray [$i]->vermoegen = ($this->indexWerteArray [$i]->bargeld + $this->indexWerteArray [$i]->wert);
 	}
 	private function berechneGesamtrenditeIndex() {
-		$return = ($this->firstAdjClose > 0) ? round ( (($this->lastAdjClose / $this->firstAdjClose) * 100), 2 ) : null;
+		$return = ($this->firstAdjClose > 0) ? round ( (($this->lastAdjClose / $this->firstAdjClose) * 100)-100, 2 ) : null;
 		return $return;
 	}
 	private function berechneGesamtrenditeKapital() {
-		$return = ($this->firstAdjClose > 0) ? round ( ((($this->totalVermoegenEnde) / ($this->totalRenteeinzahlungen + $this->totalStartkapital)) * 100), 2 ) : null;
+		$return = ($this->firstAdjClose > 0) ? round ( (((100/($this->totalStartkapital+$this->totalRenteeinzahlungen)) * ($this->totalVermoegenEnde))-100), 2 ) : null;
 		return $return;
 	}
 	private function berechneVeraenderungStartkapital() {
-		$return = ($this->totalStartkapital > 0) ? round ( ((($this->totalVermoegenEnde) / $this->totalStartkapital) * 100), 2 ) : null;
+		$return = ($this->totalStartkapital > 0) ? round ( ((($this->totalVermoegenEnde) / $this->totalStartkapital) * 100)-100, 2 ) : null;
 		return $return;
 	}
 	private function berechneVeraenderungStartkapitalGeld() {
@@ -398,7 +401,8 @@ class Berechnungen {
 	private function berechneSignale($i) {
 		$close = $this->indexWerteArray [$i]->adjClose;
 		// $closeVortag = ($i < (count($this->indexWerteArray)-1)) ? $this->indexWerteArray [$i-1]->adjClose : $close;
-		$closeVortag = ($i > 0) ? $this->indexWerteArray [$i - 1]->adjClose : $close;
+		$total = count ( $this->indexWerteArray ) - 1;
+		$closeVortag = ($i < $total) ? $this->indexWerteArray [$i + 1]->adjClose : $close;
 		$buy = $this->indexWerteArray [$i]->buySMA;
 		$sell = $this->indexWerteArray [$i]->sellSMA;
 		
