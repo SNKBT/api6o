@@ -1,7 +1,4 @@
-api6o
-=====
-
-## Einleitung
+## Software für das Backtesting von Tradingsystemen
 Die Software für das Backtesting von Tradingsystemen verfügt über eine Datenbank und zwei entsprechende Benutzeroberflächen, auf welchen die Daten der gewünschten Aktien und Indexes eingegeben werden können. Das Bindeglied dazwischen bildet das API (engl. Application programming interface), welches nachfolgend beschrieben wird.
 Die Programmierschnittstelle stellt verschiedene Funktionen zur Verfügung und stellt die Kommunikation zwischen dem GUI (engl. Graphical User Interface) und der Datenbank sicher.
 
@@ -11,13 +8,14 @@ Die jeweils neuste Version des API kann über dieses GitHub Repository [herunterg
 Auf der Datenbankseite muss eine neue Datenbank angelegt und mit der beigelegten Struktur aufgebaut werden (SQL-Dump: `includes/db_structure.sql`). Zudem können erste Yahoo Finance Initialdaten importiert werden (SQL-Dump: `includes/db_sample-data.sql`).
 Damit das Aktualisieren der Yahoo Finance Daten funktioniert, muss jeweils ein Initial-Datensatz zur entsprechenden Aktie existieren. Beispiel:
 Tabelle indexe:
-| id        | name           | kuerzel  |
-| ------------- |:-------------:| -----:|
-| 1101      | SMI | ^SSMI |
+| id   | name | kuerzel |
+| ---- | ---- | ------- |
+| 1101 | SMI  | ^SSMI   |
+
 Tabelle indexe_values:
-| id        | tradeDate           | adjClose  | fk_indexe_id |
-| ------------- |:-------------:| -----:|
-| 1 | 1971-01-05 | 0 | 1101 |
+| id | tradeDate  | adjClose | fk_indexe_id |
+| -- | ---------- | -------- | ------------ |
+| 1  | 1971-01-05 | 0        | 1101         |
 
 ### Swagger-PHP
 Um die API Funktionalitäten zu testen wurde die Dokumentationssoftware [Swagger](https://github.com/wordnik/swagger-ui) eingesetzt, welche eine benutzerfreundliche Oberfläche zur Verfügung stellt.
@@ -58,7 +56,8 @@ php swagger.phar /project/root/top_level -o /var/html/swagger-docs
 ```
 In unserem Fall sieht der Befehl auf einer Windows Konsole wie folgt aus:
 ```php
-"[...]\php\php" "[...]\htdocs\swagger-php-master\swagger.phar" "[...]\htdocs\api6o" -o "[...]\htdocs\api6o\includes\api-docs"```
+"[...]\php\php" "[...]\htdocs\swagger-php-master\swagger.phar" "[...]\htdocs\api6o" -o "[...]\htdocs\api6o\includes\api-docs"
+```
 Beim Aufruf der index.php Datei wird automatisch zur Swagger Dokumentation verwiesen: `http://[URL]/libs/swagger/`.
 
 
