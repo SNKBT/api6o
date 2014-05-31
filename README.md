@@ -7,17 +7,17 @@ Die Programmierschnittstelle stellt verschiedene Funktionen zur Verfügung und st
 Die jeweils neuste Version des API kann über dieses GitHub Repository [heruntergeladen](https://github.com/SNKBT/api6o/archive/master.zip) und auf einem Apache Webserver installiert werden. Anschliessend muss die Beispiel-Konfigurationsdatei auf `config.php` umbenannt und angepasst werden.
 Auf der Datenbankseite muss eine neue Datenbank angelegt und mit der beigelegten Struktur aufgebaut werden (SQL-Dump: `includes/db_structure.sql`). Zudem können erste Yahoo Finance Initialdaten importiert werden (SQL-Dump: `includes/db_sample-data.sql`).
 Damit das Aktualisieren der Yahoo Finance Daten funktioniert, muss jeweils ein Initial-Datensatz zur entsprechenden Aktie existieren. Beispiel:
-Tabelle indexe
+**Tabelle indexe**
 
 | id   | name | kuerzel |
 | ---- | ---- | ------- |
 | 1101 | SMI  | ^SSMI   |
 
-Tabelle indexe_values
+**Tabelle indexe_values**
 
-| id | tradeDate  | adjClose | fk_indexe_id |
-| -- | ---------- | -------- | ------------ |
-| 1  | 1971-01-05 | 0        | 1101         |
+| id  | tradeDate  | adjClose | fk_indexe_id |
+| --- | ---------- | -------- | ------------ |
+| 1   | 1971-01-05 | 0        | 1101         |
 
 ### Swagger-PHP
 Um die API Funktionalitäten zu testen wurde die Dokumentationssoftware [Swagger](https://github.com/wordnik/swagger-ui) eingesetzt, welche eine benutzerfreundliche Oberfläche zur Verfügung stellt.
