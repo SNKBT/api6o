@@ -313,10 +313,12 @@ class Berechnungen {
 					$this->zahleEin ( $i, $this->startkaptalViertel );
 					$this->startkapital = ($this->startkapital - $this->startkaptalViertel);
 					$this->totalBargeld = ($this->totalBargeld - $this->startkaptalViertel);
+					$this->totalBargeld = ($this->totalBargeld < 0) ? 0 : $this->totalBargeld;
 				} elseif ((date ( 'N', strtotime ( $this->indexWerteArray [$i]->tradeDate ) ) == 1) && ($this->indexWerteArray [$i]->adjClose >= $this->startkurs) && ($this->startkapital > 0)) {
 					$this->zahleEin ( $i, $this->startkaptalViertel );
 					$this->startkapital = ($this->startkapital - $this->startkaptalViertel);
 					$this->totalBargeld = ($this->totalBargeld - $this->startkaptalViertel);
+					$this->totalBargeld = ($this->totalBargeld < 0) ? 0 : $this->totalBargeld;
 					if ($this->startkapital < 0)
 						$this->startkapital = 0;
 				}
@@ -348,7 +350,7 @@ class Berechnungen {
 	private function zahleAus($i) {
 		if ((($this->totalAnteile * $this->indexWerteArray [$i]->adjClose) + $this->rente_auszahlung) > 0) {
 			$this->indexWerteArray [$i]->desinvestition = $this->rente_auszahlung;
-			$deinvestition = round ( ($this->rente_auszahlung / $this->indexWerteArray [$i]->adjClose), 4 );
+			$deinvestition = round ( ($this->rente_auszahlung / $this->indexWerteArray [$i]->adjClose), 2 );
 			$this->totalAnteile = ($this->totalAnteile + $deinvestition);
 		}
 		$this->berechneAnteilUndWert ( $i );
@@ -357,7 +359,7 @@ class Berechnungen {
 		if ($kapital >= 0) {
 			$this->indexWerteArray [$i]->investition = $kapital;
 			$this->totalRenteeinzahlungen += ($rente == true) ? $kapital : 0;
-			$investition = round ( ($kapital / $this->indexWerteArray [$i]->adjClose), 4 );
+			$investition = round ( ($kapital / $this->indexWerteArray [$i]->adjClose), 2 );
 			$this->totalAnteile = ($this->totalAnteile + $investition);
 			$this->berechneAnteilUndWert ( $i );
 		}
@@ -365,7 +367,7 @@ class Berechnungen {
 	private function berechneAnteilUndWert($i) {
 		$this->indexWerteArray [$i]->anteile = ($this->totalAnteile > 0) ? $this->totalAnteile : 0;
 		$this->indexWerteArray [$i]->bargeld = ($this->totalBargeld);
-		$this->indexWerteArray [$i]->wert = round ( $this->totalAnteile * $this->indexWerteArray [$i]->adjClose, 4 );
+		$this->indexWerteArray [$i]->wert = round ( $this->totalAnteile * $this->indexWerteArray [$i]->adjClose, 2 );
 		$this->indexWerteArray [$i]->vermoegen = ($this->indexWerteArray [$i]->bargeld + $this->indexWerteArray [$i]->wert);
 	}
 	private function berechneGesamtrenditeIndex() {
@@ -409,7 +411,7 @@ class Berechnungen {
 		
 		if ($this->buyModus == true && $this->totalAnteile > 0 && $closeVortag > $sell && $close < $sell && $sell < $buy) {
 			$this->indexWerteArray [$i]->signal = "sell";
-			$desinvestition = round ( ($this->totalAnteile * $this->indexWerteArray [$i]->adjClose), 4 );
+			$desinvestition = round ( ($this->totalAnteile * $this->indexWerteArray [$i]->adjClose), 2 );
 			$this->indexWerteArray [$i]->desinvestition = $desinvestition;
 			$this->totalBargeld = ($this->totalBargeld + $desinvestition);
 			$this->totalAnteile = 0;
